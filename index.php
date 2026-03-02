@@ -9,17 +9,22 @@
 :root {
   --purple: #bc13fe; --cyan: #00f2ff; --gold: #ffcc00;
   --red: #ff3131;    --green: #00ff88; --bg: #05010a;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --real-height: 100dvh;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   background:var(--bg); color:#fff; font-family:'Rajdhani',sans-serif;
-  height:100vh; overflow:hidden; user-select:none;
+  height:var(--real-height); overflow:hidden; user-select:none;
+  padding: var(--safe-top) 0 0 0;
 }
 #bg-canvas { position:fixed; inset:0; width:100%; height:100%; z-index:0; }
 #app {
-  position:relative; z-index:10; height:100vh;
+  position:relative; z-index:10; height:var(--real-height);
   display:flex; flex-direction:column; align-items:center;
   justify-content:space-between; padding:20px 0 16px;
+  padding-bottom: max(16px, var(--safe-bottom));
 }
 
 /* ── HEADER ── */
@@ -35,11 +40,12 @@ header { text-align:center; }
 #carousel-wrap {
   flex:1; width:100%; display:flex; align-items:center;
   justify-content:center; position:relative; overflow:hidden;
+  min-height: 380px;
 }
 .nav-btn {
-  position:absolute; z-index:30; width:48px; height:48px; border-radius:50%;
+  position:absolute; z-index:30; width:42px; height:42px; border-radius:50%;
   border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04);
-  backdrop-filter:blur(8px); color:#fff; font-size:22px; cursor:pointer;
+  backdrop-filter:blur(8px); color:#fff; font-size:20px; cursor:pointer;
   display:flex; align-items:center; justify-content:center; transition:all .2s;
 }
 .nav-btn:hover { background:rgba(188,19,254,.2); border-color:var(--purple); }
@@ -110,12 +116,17 @@ header { text-align:center; }
 .card-rank { font-family:'Orbitron',monospace; font-size:22px; font-weight:900; font-style:italic; }
 
 /* ── FOOTER ── */
-footer { width:100%; max-width:480px; padding:0 20px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+footer { 
+  width:100%; max-width:480px; padding:0 16px; 
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  box-sizing:border-box;
+}
 
 #diff-selector {
   display:flex; gap:5px; background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.08); border-radius:30px; padding:4px;
-  min-height:42px; align-items:center; justify-content:center;
+  min-height:auto; align-items:center; justify-content:center;
+  flex-wrap:wrap;
 }
 .diff-btn {
   padding:7px 22px; border-radius:24px; border:none;
@@ -133,6 +144,7 @@ footer { width:100%; max-width:480px; padding:0 20px; display:flex; flex-directi
   letter-spacing:4px; cursor:pointer; transition:all .2s;
   box-shadow:0 0 24px rgba(188,19,254,.4); animation:pulse-btn 2.5s ease-in-out infinite;
   position:relative; overflow:hidden;
+  white-space:nowrap;
 }
 #start-btn::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent); transform:translateX(-100%); transition:.5s; }
 #start-btn:hover::after { transform:translateX(100%); }
@@ -159,6 +171,8 @@ footer { width:100%; max-width:480px; padding:0 20px; display:flex; flex-directi
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px;
   background:var(--bg); cursor:pointer;
   transition: opacity .6s ease;
+  height: var(--real-height);
+  padding: var(--safe-top) 0 var(--safe-bottom) 0;
 }
 #splash.hide { opacity:0; pointer-events:none; }
 .splash-logo {
@@ -179,6 +193,114 @@ footer { width:100%; max-width:480px; padding:0 20px; display:flex; flex-directi
 .splash-line {
   width:80px; height:1px;
   background:linear-gradient(90deg,transparent,var(--purple),transparent);
+}
+
+/* ── RESPONSIVE MEDIA QUERIES ── */
+@media (max-width: 400px) {
+  .nav-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  #btn-prev { left: 8px; }
+  #btn-next { right: 8px; }
+  .logo {
+    font-size: 22px;
+    letter-spacing: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .song-card {
+    width: 210px;
+    height: 310px;
+  }
+  .card-cover {
+    height: 130px;
+  }
+  .card-title {
+    font-size: 12px;
+  }
+  .card-artist {
+    font-size: 11px;
+  }
+  .card-bpm {
+    font-size: 9px;
+  }
+  .diff-btn {
+    padding: 6px 16px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+  #start-btn {
+    padding: 13px;
+    font-size: 14px;
+    letter-spacing: 3px;
+  }
+}
+
+@media (max-width: 340px) {
+  .diff-btn {
+    padding: 5px 12px;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+}
+
+@media (max-height: 600px) {
+  .song-card {
+    transform: scale(0.85);
+  }
+  footer {
+    transform: scale(0.9);
+  }
+  #carousel-wrap {
+    min-height: 320px;
+  }
+  #visualizer {
+    height: 18px;
+  }
+  .logo {
+    font-size: 20px;
+  }
+}
+
+@media (max-height: 500px) {
+  #carousel-wrap {
+    min-height: 280px;
+  }
+  .song-card {
+    transform: scale(0.75);
+  }
+  .splash-logo {
+    font-size: 28px;
+    letter-spacing: 8px;
+  }
+}
+
+/* Soporte para orientación horizontal */
+@media (orientation: landscape) and (max-height: 450px) {
+  #app {
+    flex-direction: row;
+    padding: 10px;
+  }
+  header {
+    width: 30%;
+  }
+  #carousel-wrap {
+    width: 40%;
+    min-height: auto;
+  }
+  footer {
+    width: 30%;
+    transform: scale(0.85);
+  }
+  .song-card {
+    transform: scale(0.7);
+  }
+  #visualizer {
+    display: none;
+  }
 }
 </style>
 </head>
@@ -215,6 +337,24 @@ footer { width:100%; max-width:480px; padding:0 20px; display:flex; flex-directi
 </div>
 
 <script>
+(function fixViewportHeight() {
+  const setVH = () => {
+    // Primero intentamos con dvh si es soportado
+    if (CSS.supports('height', '100dvh')) {
+      document.documentElement.style.setProperty('--real-height', '100dvh');
+    } else {
+      // Fallback para navegadores antiguos
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      document.documentElement.style.setProperty('--real-height', 'calc(var(--vh, 1vh) * 100)');
+    }
+  };
+  
+  setVH();
+  window.addEventListener('resize', setVH);
+  window.addEventListener('orientationchange', () => setTimeout(setVH, 100));
+})();
+
 const DIFF_COLORS = { easy:'#00ff88', normal:'#00f2ff', hard:'#ff3131' };
 const DIFF_ORDER  = ['easy','normal','hard'];
 const RANK_COLORS = { S:'#ffcc00', A:'#00f2ff', B:'#00ff88', C:'#bc13fe', D:'#ff3131' };
@@ -226,7 +366,10 @@ const bgCanvas = document.getElementById('bg-canvas');
 const bgCtx = bgCanvas.getContext('2d');
 let bgOff = 0;
 function drawBg() {
-  bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
+  // Usar window.innerHeight pero en realidad queremos usar dvh
+  // Para el canvas de fondo, podemos mantener innerHeight ya que es solo fondo
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
   const W = bgCanvas.width, H = bgCanvas.height;
   const g = bgCtx.createRadialGradient(W/2,H*.4,0,W/2,H*.4,H);
   g.addColorStop(0,'#1a0535'); g.addColorStop(1,'#05010a');
@@ -237,6 +380,19 @@ function drawBg() {
   for(let x=0;x<W;x+=80){ bgCtx.beginPath(); bgCtx.moveTo(x,0); bgCtx.lineTo(x,H); bgCtx.stroke(); }
 }
 (function loop(){ drawBg(); requestAnimationFrame(loop); })();
+
+// Añadir listener para cuando cambie el viewport (ej. cuando se oculta la barra)
+window.addEventListener('resize', () => {
+  // Forzar recálculo de altura si es necesario
+  document.documentElement.style.setProperty('--real-height', window.innerHeight + 'px');
+});
+
+// También escuchar el evento orientationchange
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    document.documentElement.style.setProperty('--real-height', window.innerHeight + 'px');
+  }, 100);
+});
 
 // ── Load songs ────────────────────────────────────────────────────────────────
 async function loadSongs() {

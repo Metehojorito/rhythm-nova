@@ -97,6 +97,116 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
 }
 .lane-target-ring.tapped { transform:translate(-50%,-50%) scale(1.3); box-shadow:0 0 28px var(--cyan),0 0 55px rgba(0,242,255,.35); }
 
+/* HEALTH BAR - Actualizar los estilos existentes */
+#health-wrap {
+  width:100%; max-width:480px;
+  padding:6px 18px 4px;
+  pointer-events:none;
+}
+#health-track {
+  width:100%; height:6px;
+  background:rgba(255,255,255,.07);
+  border-radius:3px; overflow:hidden;
+  position:relative;
+  transition: box-shadow 0.3s ease;
+}
+#health-track.full-glow {
+  box-shadow: 0 0 20px var(--green), 0 0 40px rgba(0, 255, 136, 0.4);
+  animation: pulse-glow-green 1.5s ease-in-out infinite;
+}
+#health-track.danger-glow {
+  box-shadow: 0 0 15px var(--red), 0 0 30px rgba(255, 49, 49, 0.6);
+  animation: pulse-glow-red 0.8s ease-in-out infinite;
+}
+#health-bar {
+  height:100%; width:70%;
+  border-radius:3px;
+  transition:width .15s ease-out, background .4s;
+  background:var(--green);
+}
+#health-bar.low    { background:#facc15; }
+#health-bar.danger { background:var(--red); }
+#health-bar.full   { 
+  background: linear-gradient(90deg, var(--green), #7fff7f);
+  box-shadow: 0 0 10px var(--green);
+}
+#health-bar.shaking {
+  animation: shake-bar 0.12s ease-in-out infinite;
+}
+
+/* Animaciones nuevas */
+@keyframes shake-bar {
+  0% { transform: translateX(0) scaleX(1); }
+  20% { transform: translateX(-3px) scaleX(1.03); }
+  40% { transform: translateX(3px) scaleX(0.97); }
+  60% { transform: translateX(-2px) scaleX(1.02); }
+  80% { transform: translateX(2px) scaleX(0.98); }
+  100% { transform: translateX(0) scaleX(1); }
+}
+
+@keyframes pulse-glow-green {
+  0%, 100% { 
+    box-shadow: 0 0 20px var(--green), 0 0 40px rgba(0, 255, 136, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 30px var(--green), 0 0 60px rgba(0, 255, 136, 0.6);
+  }
+}
+
+@keyframes pulse-glow-red {
+  0%, 100% { 
+    box-shadow: 0 0 15px var(--red), 0 0 30px rgba(255, 49, 49, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 25px var(--red), 0 0 50px rgba(255, 49, 49, 0.8);
+  }
+}
+
+/* Opcional: Efecto de pulso para el texto FULL HEALTH si quieres que combine */
+#full-health {
+  position:absolute; top:60px; left:50%; transform:translateX(-50%);
+  font-family:'Orbitron',monospace; font-size:13px; letter-spacing:3px;
+  color:var(--green); text-shadow:0 0 14px var(--green);
+  opacity:0; pointer-events:none; transition:opacity .4s;
+  white-space:nowrap;
+}
+#full-health.show { 
+  opacity:1;
+  animation: text-pulse-green 1.5s ease-in-out infinite;
+}
+
+@keyframes text-pulse-green {
+  0%, 100% { text-shadow: 0 0 14px var(--green); }
+  50% { text-shadow: 0 0 25px var(--green), 0 0 40px var(--green); }
+}
+
+/* FAILED screen */
+#failed-screen {
+  position:fixed; inset:0; z-index:75;
+  display:none; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+  background:rgba(5,5,8,.85); backdrop-filter:blur(8px);
+}
+#failed-screen.show { display:flex; }
+#failed-screen h2 {
+  font-family:'Orbitron',monospace; font-size:52px; font-weight:900; letter-spacing:6px;
+  color:var(--red); text-shadow:0 0 30px var(--red), 0 0 60px rgba(255,49,49,.4);
+  animation:fail-pop .4s ease-out;
+}
+@keyframes fail-pop {
+  0%  { transform:scale(1.6); opacity:0; }
+  60% { transform:scale(.95); opacity:1; }
+  100%{ transform:scale(1);   opacity:1; }
+}
+#failed-screen p { font-size:13px; color:rgba(255,255,255,.4); letter-spacing:2px; }
+#full-health {
+  position:absolute; top:60px; left:50%; transform:translateX(-50%);
+  font-family:'Orbitron',monospace; font-size:13px; letter-spacing:3px;
+  color:var(--green); text-shadow:0 0 14px var(--green);
+  opacity:0; pointer-events:none; transition:opacity .4s;
+  white-space:nowrap;
+}
+#full-health.show { opacity:1; }
+
 /* Feedback */
 #feedback {
   position:absolute; bottom:158px; left:50%; transform:translateX(-50%);
@@ -176,6 +286,16 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
   <div id="cd-go">GO!</div>
 </div>
 
+<!-- FAILED -->
+<div id="failed-screen">
+  <h2>FAILED</h2>
+  <p>La salud llegó a cero</p>
+  <div style="display:flex;gap:10px;margin-top:8px;">
+    <button onclick="retryGame()" class="res-btn" style="border:1px solid var(--purple);background:rgba(188,19,254,.1);color:#fff;">↺ &nbsp;RETRY</button>
+    <a href="javascript:returnToMenu()" class="res-btn" style="border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;text-decoration:none;">☰ &nbsp;MENÚ</a>
+  </div>
+</div>
+
 <!-- ERROR -->
 <div id="error-screen">
   <h2>ERROR</h2>
@@ -204,6 +324,10 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
     </div>
   </div>
 
+  <div id="health-wrap">
+    <div id="health-track"><div id="health-bar"></div></div>
+  </div>
+
   <div id="lane-area">
     <div id="lane-strip"></div>
     <canvas id="note-canvas"></canvas>
@@ -222,6 +346,7 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
   <div class="res-sub"  id="res-title">—</div>
   <div class="res-diff" id="res-diff">—</div>
   <div id="new-best">★ NUEVO RÉCORD ★</div>
+  <div id="full-health">💚 FULL HEALTH</div>
   <div class="result-grid">
     <div class="result-item"><div class="rl">Score</div><div class="rv" id="res-score">0</div></div>
     <div class="result-item"><div class="rl">Max Combo</div><div class="rv" id="res-combo">0</div></div>
@@ -257,6 +382,12 @@ const TIMING = { perfect:55, good:120, bad:220 };
 
 // Number of lanes — read from CHART.lanes (1, 2 or 3). Default 1.
 let LANE_COUNT = 1;
+
+// Health bar
+const HEALTH_START  = 70;   // starting %
+const HEALTH_MAX    = 100;
+const HEALTH_DELTA  = { perfect: 3, good: 1, bad: -8, miss: -15 };
+let health = HEALTH_START;
 
 // Track which lanes are currently held down (for hold notes)
 const lanePressed = [false, false, false];
@@ -479,11 +610,48 @@ function playSynth(type) {
   }
 }
 
+function vibrate(ms) {
+  if(navigator.vibrate) navigator.vibrate(ms);
+}
+
+// Actualizar la función updateHealth para manejar los nuevos estados
+function updateHealth(delta) {
+  health = Math.max(0, Math.min(HEALTH_MAX, health + delta));
+  const bar = document.getElementById('health-bar');
+  const track = document.getElementById('health-track');
+  bar.style.width = health + '%';
+  
+  // Remover clases existentes
+  bar.classList.remove('low', 'danger', 'full', 'shaking');
+  track.classList.remove('full-glow', 'danger-glow');
+  
+  // Aplicar nuevas clases según el nivel de salud
+  if (health >= HEALTH_MAX) {
+    // Efecto GLOW cuando está al 100%
+    bar.classList.add('full');
+    track.classList.add('full-glow');
+  } else if (health <= 25 && health > 0) {
+    // Efecto TEMBLOR + GLOW ROJO cuando está por debajo del 25%
+    bar.classList.add('danger', 'shaking');
+    track.classList.add('danger-glow');
+  } else if (health <= 50 && health > 25) {
+    bar.classList.add('low');
+  }
+  
+  if(health <= 0) triggerFailed();
+}
+
+function triggerFailed() {
+  isRunning = false;
+  stopSong();
+  document.getElementById('failed-screen').classList.add('show');
+}
+
 function playHit(type) {
   if (type==='miss')    { missBuf ? playBuffer(missBuf,.7) : playSynth('miss'); return; }
   if (type==='bad')     { badBuf  ? playBuffer(badBuf, .7) : playSynth('bad');  return; }
-  if (type==='perfect') { hitBuf  ? playBuffer(hitBuf, 1)  : playSynth('perfect'); return; }
-  if (type==='good')    { hitBuf  ? playBuffer(hitBuf, .7) : playSynth('good'); return; }
+  if (type==='perfect') { hitBuf  ? playBuffer(hitBuf, 1)  : playSynth('perfect'); vibrate(35); return; }
+  if (type==='good')    { hitBuf  ? playBuffer(hitBuf, .7) : playSynth('good');    vibrate(15); return; }
 }
 
 // ── UI sounds ─────────────────────────────────────────────────────
@@ -859,6 +1027,7 @@ function gameLoop() {
       // Miss: head passed too late without press
       if(!note.missed && !note.holdStarted && ttH < -TIMING.bad) {
         note.missed = true; misses++; combo=0;
+        updateHealth(HEALTH_DELTA.miss);
         updateCombo(); showFeedback('MISS','miss'); playHit('miss');
       }
 
@@ -896,6 +1065,7 @@ function gameLoop() {
     if(note.type === 'flick') {
       if(!note.missed && ttH < -TIMING.bad){
         note.missed=true; misses++; combo=0;
+        updateHealth(HEALTH_DELTA.miss);
         updateCombo(); showFeedback('MISS','miss'); playHit('miss');
       }
       if(yHead>-40 && yHead<lH+40) drawFlickNote(x, yHead, Math.max(0,alpha), note.missed, note.direction||'left');
@@ -905,6 +1075,7 @@ function gameLoop() {
     // ── NORMAL NOTE ──
     if(!note.missed && ttH < -TIMING.bad){
       note.missed=true; misses++; combo=0;
+      updateHealth(HEALTH_DELTA.miss);
       updateCombo(); showFeedback('MISS','miss'); playHit('miss');
     }
     if(yHead>-40 && yHead<lH+40) drawNote(x, yHead, Math.max(0,alpha), note.missed, note.lane);
@@ -930,6 +1101,7 @@ function resolveHold(note, reason) {
   }
   const mult = combo>=40?8:combo>=20?4:combo>=10?2:1;
   score += pts * mult;
+  updateHealth(HEALTH_DELTA[type==='miss'?'miss':type]);
   updateScore(); updateCombo(); showFeedback(label, cls); playHit(type==='miss'?'miss':type);
   spawnParticles(laneX(note.lane, noteCanvas.width), hitY, type==='miss'?'bad':type, note.lane);
 }
@@ -997,6 +1169,7 @@ function handleFlick(lane, direction) {
     // Wrong direction → BAD
     closest.hit = true; bads++; combo = 0;
     score += 10;
+    updateHealth(HEALTH_DELTA.bad);
     updateScore(); updateCombo(); showFeedback('BAD','bad'); playHit('bad');
     spawnParticles(laneX(closest.lane, noteCanvas.width), hitY, 'bad', closest.lane);
   }
@@ -1016,6 +1189,7 @@ function processHit(note, diff) {
 
   const mult = combo>=40?8:combo>=20?4:combo>=10?2:1;
   score += pts*mult;
+  updateHealth(HEALTH_DELTA[type]);
   updateScore(); updateCombo(); showFeedback(label,cls); playHit(type);
   spawnParticles(laneX(note.lane, noteCanvas.width), hitY, type, note.lane);
 }
@@ -1089,7 +1263,11 @@ function runCountdown() {
 //  GAME FLOW
 // ══════════════════════════════════════════
 function resetState() {
-  score=0; combo=0; maxCombo=0; perfects=0; goods=0; bads=0; misses=0; particles=[];
+  score=0; combo=0; maxCombo=0; perfects=0; goods=0; bads=0; misses=0; particles=[]; health=HEALTH_START;
+  const hb=document.getElementById('health-bar');
+  if(hb){hb.style.width=HEALTH_START+'%';hb.classList.remove('low','danger');}
+  const fs=document.getElementById('failed-screen');
+  if(fs) fs.classList.remove('show');
   notes = CHART.notes.map(n=>({time:n.time,lane:Math.min(n.lane||0,LANE_COUNT-1),type:n.type||'normal',duration:n.duration||0,direction:n.direction||'left',hit:false,missed:false,holdStarted:false,holdActive:false,holdStartTime:0,holdProgress:0}));
   updateScore(); updateCombo();
   document.getElementById('progress-bar').style.width='0%';
@@ -1130,6 +1308,10 @@ async function endGame() {
   if (isNewBest) document.getElementById('new-best').style.display='block';
 
   setTimeout(() => sfxResults(rank), 300);
+  if(health >= HEALTH_MAX){
+    const fh=document.getElementById('full-health');
+    if(fh) fh.classList.add('show');
+  }
   document.getElementById('results').classList.add('show');
 
   // Save to server
@@ -1152,6 +1334,11 @@ async function endGame() {
   } catch(e) {
     console.warn('Score no guardado:', e);
   }
+}
+
+function retryGame() {
+  document.getElementById('failed-screen').classList.remove('show');
+  startRound();
 }
 
 function returnToMenu() {
