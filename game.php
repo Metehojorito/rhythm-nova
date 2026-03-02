@@ -97,7 +97,7 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
 }
 .lane-target-ring.tapped { transform:translate(-50%,-50%) scale(1.3); box-shadow:0 0 28px var(--cyan),0 0 55px rgba(0,242,255,.35); }
 
-/* HEALTH BAR - Actualizar los estilos existentes */
+/* HEALTH BAR */
 #health-wrap {
   width:100%; max-width:480px;
   padding:6px 18px 4px;
@@ -126,58 +126,28 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
 }
 #health-bar.low    { background:#facc15; }
 #health-bar.danger { background:var(--red); }
-#health-bar.full   { 
+#health-bar.full   {
   background: linear-gradient(90deg, var(--green), #7fff7f);
   box-shadow: 0 0 10px var(--green);
 }
 #health-bar.shaking {
   animation: shake-bar 0.12s ease-in-out infinite;
 }
-
-/* Animaciones nuevas */
 @keyframes shake-bar {
-  0% { transform: translateX(0) scaleX(1); }
-  20% { transform: translateX(-3px) scaleX(1.03); }
-  40% { transform: translateX(3px) scaleX(0.97); }
-  60% { transform: translateX(-2px) scaleX(1.02); }
-  80% { transform: translateX(2px) scaleX(0.98); }
+  0%   { transform: translateX(0) scaleX(1); }
+  20%  { transform: translateX(-3px) scaleX(1.03); }
+  40%  { transform: translateX(3px) scaleX(0.97); }
+  60%  { transform: translateX(-2px) scaleX(1.02); }
+  80%  { transform: translateX(2px) scaleX(0.98); }
   100% { transform: translateX(0) scaleX(1); }
 }
-
 @keyframes pulse-glow-green {
-  0%, 100% { 
-    box-shadow: 0 0 20px var(--green), 0 0 40px rgba(0, 255, 136, 0.4);
-  }
-  50% { 
-    box-shadow: 0 0 30px var(--green), 0 0 60px rgba(0, 255, 136, 0.6);
-  }
+  0%, 100% { box-shadow: 0 0 20px var(--green), 0 0 40px rgba(0, 255, 136, 0.4); }
+  50%       { box-shadow: 0 0 30px var(--green), 0 0 60px rgba(0, 255, 136, 0.6); }
 }
-
 @keyframes pulse-glow-red {
-  0%, 100% { 
-    box-shadow: 0 0 15px var(--red), 0 0 30px rgba(255, 49, 49, 0.5);
-  }
-  50% { 
-    box-shadow: 0 0 25px var(--red), 0 0 50px rgba(255, 49, 49, 0.8);
-  }
-}
-
-/* Opcional: Efecto de pulso para el texto FULL HEALTH si quieres que combine */
-#full-health {
-  position:absolute; top:60px; left:50%; transform:translateX(-50%);
-  font-family:'Orbitron',monospace; font-size:13px; letter-spacing:3px;
-  color:var(--green); text-shadow:0 0 14px var(--green);
-  opacity:0; pointer-events:none; transition:opacity .4s;
-  white-space:nowrap;
-}
-#full-health.show { 
-  opacity:1;
-  animation: text-pulse-green 1.5s ease-in-out infinite;
-}
-
-@keyframes text-pulse-green {
-  0%, 100% { text-shadow: 0 0 14px var(--green); }
-  50% { text-shadow: 0 0 25px var(--green), 0 0 40px var(--green); }
+  0%, 100% { box-shadow: 0 0 15px var(--red), 0 0 30px rgba(255, 49, 49, 0.5); }
+  50%       { box-shadow: 0 0 25px var(--red), 0 0 50px rgba(255, 49, 49, 0.8); }
 }
 
 /* FAILED screen */
@@ -205,7 +175,14 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
   opacity:0; pointer-events:none; transition:opacity .4s;
   white-space:nowrap;
 }
-#full-health.show { opacity:1; }
+#full-health.show {
+  opacity:1;
+  animation: text-pulse-green 1.5s ease-in-out infinite;
+}
+@keyframes text-pulse-green {
+  0%, 100% { text-shadow: 0 0 14px var(--green); }
+  50%       { text-shadow: 0 0 25px var(--green), 0 0 40px var(--green); }
+}
 
 /* Feedback */
 #feedback {
@@ -256,6 +233,77 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
 #retry-btn:hover { background:rgba(188,19,254,.22); }
 #menu-btn { border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:rgba(255,255,255,.55); }
 #menu-btn:hover { color:#fff; background:rgba(255,255,255,.1); }
+
+/* ── ACCURACY BAR ── */
+.acc-wrap { width:260px; margin-bottom:18px; }
+.acc-label { font-size:9px; letter-spacing:3px; color:rgba(255,255,255,.3); text-transform:uppercase; margin-bottom:5px; display:flex; justify-content:space-between; }
+.acc-label span { font-family:'Orbitron',monospace; font-size:13px; font-weight:700; color:#fff; }
+.acc-bars { display:flex; height:8px; border-radius:4px; overflow:hidden; gap:1px; }
+.acc-seg { height:100%; border-radius:1px; transition:width .6s cubic-bezier(.4,0,.2,1); }
+.acc-seg.perfect { background:var(--gold); }
+.acc-seg.good    { background:var(--cyan); }
+.acc-seg.bad     { background:var(--purple); }
+.acc-seg.miss    { background:var(--red); }
+.acc-legend { display:flex; gap:10px; margin-top:5px; flex-wrap:wrap; justify-content:center; }
+.acc-leg-item { font-size:9px; color:rgba(255,255,255,.4); display:flex; align-items:center; gap:3px; }
+.acc-leg-dot { width:6px; height:6px; border-radius:50%; }
+
+/* ── SEAL BADGES ── */
+#badges-wrap {
+  display:flex; flex-direction:column; align-items:center;
+  margin-bottom:14px; gap:8px;
+}
+#badges-row {
+  display:flex; gap:14px; align-items:center; justify-content:center;
+  min-height:60px;
+}
+.seal {
+  width:52px; height:52px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; border:2px solid rgba(255,255,255,.1);
+  position:relative; flex-shrink:0;
+  transition: box-shadow .3s, border-color .3s;
+  overflow:hidden;
+}
+.seal img {
+  width:80%; height:80%; object-fit:contain;
+  display:block; margin:auto;
+  filter:drop-shadow(0 0 4px currentColor);
+}
+/* dimmed */
+.seal.dim { filter:grayscale(1) brightness(0.25); }
+
+/* earned colors */
+.seal.earned-fh { border-color:var(--green);  box-shadow:0 0 14px rgba(0,255,136,.5);  filter:none; }
+.seal.earned-fc { border-color:var(--cyan);   box-shadow:0 0 14px rgba(0,242,255,.5);  filter:none; }
+.seal.earned-ap { border-color:var(--gold);   box-shadow:0 0 14px rgba(255,204,0,.5);  filter:none; }
+.seal.earned-cb { border-color:var(--purple); box-shadow:0 0 14px rgba(188,19,254,.5); filter:none; }
+
+/* shared label strip below row */
+#badges-caption {
+  font-family:'Orbitron',monospace; font-size:10px; letter-spacing:3px;
+  color:#fff; text-transform:uppercase; text-align:center;
+  min-height:16px; pointer-events:none;
+}
+
+/* stamp animation */
+@keyframes stamp {
+  0%   { transform:scale(2.4) rotate(-15deg); opacity:0; }
+  45%  { transform:scale(0.86) rotate(4deg);  opacity:1; }
+  65%  { transform:scale(1.06) rotate(-1deg); opacity:1; }
+  100% { transform:scale(1)    rotate(0deg);  opacity:1; }
+}
+@keyframes caption-in {
+  0%   { opacity:0; transform:translateY(5px); }
+  100% { opacity:1; transform:translateY(0); }
+}
+@keyframes caption-out {
+  0%   { opacity:1; transform:translateY(0); }
+  100% { opacity:0; transform:translateY(-5px); }
+}
+.seal.stamping { animation: stamp .45s cubic-bezier(.4,0,.2,1) forwards; }
+#badges-caption.cap-in  { animation: caption-in  .3s ease forwards; }
+#badges-caption.cap-out { animation: caption-out .3s ease forwards; }
 
 /* Error screen */
 #error-screen {
@@ -346,12 +394,36 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
   <div class="res-sub"  id="res-title">—</div>
   <div class="res-diff" id="res-diff">—</div>
   <div id="new-best">★ NUEVO RÉCORD ★</div>
-  <div id="full-health">💚 FULL HEALTH</div>
+  <!-- SEAL BADGES -->
+  <div id="badges-wrap">
+    <div id="badges-row">
+      <div class="seal dim" id="seal-fh">💚</div>
+      <div class="seal dim" id="seal-fc">◆</div>
+      <div class="seal dim" id="seal-ap">★</div>
+      <div class="seal dim" id="seal-cb">🔥</div>
+    </div>
+    <div id="badges-caption"></div>
+  </div>
   <div class="result-grid">
     <div class="result-item"><div class="rl">Score</div><div class="rv" id="res-score">0</div></div>
     <div class="result-item"><div class="rl">Max Combo</div><div class="rv" id="res-combo">0</div></div>
     <div class="result-item"><div class="rl">Perfect</div><div class="rv" id="res-perfect" style="color:var(--gold)">0</div></div>
     <div class="result-item"><div class="rl">Miss</div><div class="rv" id="res-miss" style="color:var(--red)">0</div></div>
+  </div>
+  <div class="acc-wrap">
+    <div class="acc-label">Accuracy <span id="res-accuracy">0%</span></div>
+    <div class="acc-bars">
+      <div class="acc-seg perfect" id="acc-perfect" style="width:0%"></div>
+      <div class="acc-seg good"    id="acc-good"    style="width:0%"></div>
+      <div class="acc-seg bad"     id="acc-bad"     style="width:0%"></div>
+      <div class="acc-seg miss"    id="acc-miss"    style="width:0%"></div>
+    </div>
+    <div class="acc-legend">
+      <div class="acc-leg-item"><div class="acc-leg-dot" style="background:var(--gold)"></div>Perfect</div>
+      <div class="acc-leg-item"><div class="acc-leg-dot" style="background:var(--cyan)"></div>Good</div>
+      <div class="acc-leg-item"><div class="acc-leg-dot" style="background:var(--purple)"></div>Bad</div>
+      <div class="acc-leg-item"><div class="acc-leg-dot" style="background:var(--red)"></div>Miss</div>
+    </div>
   </div>
   <div id="rank">—</div>
   <div id="rank-label">—</div>
@@ -370,11 +442,37 @@ const SONG_ID  = params.get('song') || '';
 const DIFF     = params.get('diff') || 'normal';
 
 // ══════════════════════════════════════════
+//  SEAL IMAGE LOADER
+// ══════════════════════════════════════════
+// Maps seal id → asset filename (without extension)
+const SEAL_ASSETS = {
+  'seal-fh': 'full_health',
+  'seal-fc': 'full_combo',
+  'seal-ap': 'all_perfect',
+  'seal-cb': null   // set dynamically per combo tier
+};
+const COMBO_ASSETS = { 1:'combo_50', 2:'combo_100', 3:'combo_200' };
+
+function loadSealImage(sealId, assetName) {
+  if(!assetName) return;
+  const el = document.getElementById(sealId);
+  if(!el) return;
+  const img = new Image();
+  img.onload = () => { el.innerHTML = ''; el.appendChild(img); };
+  img.onerror = () => {};  // keep emoji fallback
+  img.src = `assets/images/${assetName}.png`;
+  img.alt = assetName;
+}
+
+// Load static seal images on page load
+Object.entries(SEAL_ASSETS).forEach(([id, asset]) => { if(asset) loadSealImage(id, asset); });
+
+// ══════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════
 let CHART = null;
 let score=0, combo=0, maxCombo=0, perfects=0, goods=0, bads=0, misses=0;
-let notes=[], particles=[];
+let notes=[], particles=[], trails=[];
 let isRunning=false, gameStartTime=null;
 
 const NOTE_TRAVEL_MS = 1600;
@@ -614,30 +712,22 @@ function vibrate(ms) {
   if(navigator.vibrate) navigator.vibrate(ms);
 }
 
-// Actualizar la función updateHealth para manejar los nuevos estados
 function updateHealth(delta) {
   health = Math.max(0, Math.min(HEALTH_MAX, health + delta));
-  const bar = document.getElementById('health-bar');
+  const bar   = document.getElementById('health-bar');
   const track = document.getElementById('health-track');
   bar.style.width = health + '%';
-  
-  // Remover clases existentes
   bar.classList.remove('low', 'danger', 'full', 'shaking');
   track.classList.remove('full-glow', 'danger-glow');
-  
-  // Aplicar nuevas clases según el nivel de salud
-  if (health >= HEALTH_MAX) {
-    // Efecto GLOW cuando está al 100%
+  if(health >= HEALTH_MAX) {
     bar.classList.add('full');
     track.classList.add('full-glow');
-  } else if (health <= 25 && health > 0) {
-    // Efecto TEMBLOR + GLOW ROJO cuando está por debajo del 25%
+  } else if(health <= 25 && health > 0) {
     bar.classList.add('danger', 'shaking');
     track.classList.add('danger-glow');
-  } else if (health <= 50 && health > 25) {
+  } else if(health <= 50 && health > 25) {
     bar.classList.add('low');
   }
-  
   if(health <= 0) triggerFailed();
 }
 
@@ -997,6 +1087,49 @@ function updateParticles() {
 }
 
 // ══════════════════════════════════════════
+//  NOTE TRAILS (comet effect)
+// ══════════════════════════════════════════
+// Each frame a note is visible, we spawn a small burst of sparks
+// at its position. Sparks drift upward (opposite to fall direction)
+// and sideways with slight randomness, fade quickly.
+
+function spawnTrail(x, y, lane) {
+  const col = LANE_COLORS[Math.min(lane, LANE_COLORS.length - 1)];
+  const count = 3;
+  for(let i = 0; i < count; i++) {
+    trails.push({
+      x: x + (Math.random() - 0.5) * 10,
+      y: y + (Math.random() - 0.5) * 6,
+      vx: (Math.random() - 0.5) * 1.2,
+      vy: Math.random() * -1.8 - 0.6,   // drift upward (away from hit line)
+      r:  Math.random() * 3.5 + 1.5,
+      alpha: Math.random() * 0.5 + 0.4,
+      decay: Math.random() * 0.06 + 0.05,
+      col
+    });
+  }
+}
+
+function updateTrails() {
+  trails = trails.filter(t => t.alpha > 0.01);
+  trails.forEach(t => {
+    nCtx.save();
+    nCtx.globalAlpha = t.alpha;
+    nCtx.beginPath();
+    nCtx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+    nCtx.fillStyle = t.col;
+    nCtx.shadowBlur = 6;
+    nCtx.shadowColor = t.col;
+    nCtx.fill();
+    nCtx.restore();
+    t.x  += t.vx;
+    t.y  += t.vy;
+    t.r  *= 0.88;
+    t.alpha -= t.decay;
+  });
+}
+
+// ══════════════════════════════════════════
 //  GAME LOOP
 // ══════════════════════════════════════════
 function gameLoop() {
@@ -1005,6 +1138,7 @@ function gameLoop() {
   document.getElementById('progress-bar').style.width = Math.min(elapsed/CHART.duration*100,100)+'%';
   nCtx.clearRect(0,0,noteCanvas.width,noteCanvas.height);
   updateParticles();
+  updateTrails();
 
   const lH = noteCanvas.height;
   const lW = noteCanvas.width;
@@ -1068,7 +1202,10 @@ function gameLoop() {
         updateHealth(HEALTH_DELTA.miss);
         updateCombo(); showFeedback('MISS','miss'); playHit('miss');
       }
-      if(yHead>-40 && yHead<lH+40) drawFlickNote(x, yHead, Math.max(0,alpha), note.missed, note.direction||'left');
+      if(yHead>-40 && yHead<lH+40) {
+        drawFlickNote(x, yHead, Math.max(0,alpha), note.missed, note.direction||'left');
+        if(!note.missed && alpha > 0.1) spawnTrail(x, yHead, note.lane);
+      }
       return;
     }
 
@@ -1078,7 +1215,10 @@ function gameLoop() {
       updateHealth(HEALTH_DELTA.miss);
       updateCombo(); showFeedback('MISS','miss'); playHit('miss');
     }
-    if(yHead>-40 && yHead<lH+40) drawNote(x, yHead, Math.max(0,alpha), note.missed, note.lane);
+    if(yHead>-40 && yHead<lH+40) {
+      drawNote(x, yHead, Math.max(0,alpha), note.missed, note.lane);
+      if(!note.missed && alpha > 0.1) spawnTrail(x, yHead, note.lane);
+    }
   });
 
   if(elapsed > CHART.duration+1800){ endGame(); return; }
@@ -1263,7 +1403,7 @@ function runCountdown() {
 //  GAME FLOW
 // ══════════════════════════════════════════
 function resetState() {
-  score=0; combo=0; maxCombo=0; perfects=0; goods=0; bads=0; misses=0; particles=[]; health=HEALTH_START;
+  score=0; combo=0; maxCombo=0; perfects=0; goods=0; bads=0; misses=0; particles=[]; trails=[]; health=HEALTH_START;
   const hb=document.getElementById('health-bar');
   if(hb){hb.style.width=HEALTH_START+'%';hb.classList.remove('low','danger');}
   const fs=document.getElementById('failed-screen');
@@ -1273,6 +1413,19 @@ function resetState() {
   document.getElementById('progress-bar').style.width='0%';
   document.getElementById('results').classList.remove('show');
   document.getElementById('new-best').style.display='none';
+  // Reset seals — restore emoji fallbacks (images may have been replaced)
+  const sealDefaults = { 'seal-fh':'💚', 'seal-fc':'◆', 'seal-ap':'★', 'seal-cb':'🔥' };
+  Object.entries(sealDefaults).forEach(([id, emoji]) => {
+    const el = document.getElementById(id);
+    el.className = 'seal dim';
+    // Only reset to emoji if no static image loaded
+    if(!el.querySelector('img')) el.textContent = emoji;
+  });
+  document.getElementById('badges-caption').textContent = '';
+  document.getElementById('badges-caption').className   = '';
+  ['acc-perfect','acc-good','acc-bad','acc-miss'].forEach(id=>{
+    document.getElementById(id).style.width='0%';
+  });
 }
 
 async function startRound() {
@@ -1302,17 +1455,71 @@ async function endGame() {
   document.getElementById('rank').textContent        = rank;
   document.getElementById('rank-label').textContent  = rlbl[rank];
 
+  // Accuracy bar
+  const accPct = total > 0 ? ((perfects * 100 + goods * 50) / (total * 100)) * 100 : 0;
+  document.getElementById('res-accuracy').textContent = accPct.toFixed(1) + '%';
+  if(total > 0) {
+    document.getElementById('acc-perfect').style.width = (perfects/total*100).toFixed(1)+'%';
+    document.getElementById('acc-good').style.width    = (goods/total*100).toFixed(1)+'%';
+    document.getElementById('acc-bad').style.width     = (bads/total*100).toFixed(1)+'%';
+    document.getElementById('acc-miss').style.width    = (misses/total*100).toFixed(1)+'%';
+  }
+
+  // Determine earned badges
+  const isAP  = total>0 && misses===0 && bads===0 && goods===0;
+  const isFC  = total>0 && misses===0 && bads===0 && !isAP;
+  const isFH  = health >= HEALTH_MAX;
+  let   cbTier = 0; // 1=bronze(50) 2=silver(100) 3=gold(200)
+  if(maxCombo >= 200) cbTier=3;
+  else if(maxCombo >= 100) cbTier=2;
+  else if(maxCombo >= 50)  cbTier=1;
+
+  // Combo badge label/icon per tier
+  // Set combo seal emoji fallback + try loading image
+  if(cbTier>0){
+    const cbEmoji = ['','🥉','🥈','🥇'][cbTier];
+    const cbEl = document.getElementById('seal-cb');
+    // Set emoji as fallback text (image loader will replace if PNG exists)
+    if(!cbEl.querySelector('img')) cbEl.textContent = cbEmoji;
+    loadSealImage('seal-cb', COMBO_ASSETS[cbTier]);
+  }
+
   // Client-side new-best detection (instant, before server responds)
   const prevBest = CHART.bestScore ?? null;
   const isNewBest = prevBest === null || score > prevBest;
   if (isNewBest) document.getElementById('new-best').style.display='block';
 
   setTimeout(() => sfxResults(rank), 300);
-  if(health >= HEALTH_MAX){
-    const fh=document.getElementById('full-health');
-    if(fh) fh.classList.add('show');
-  }
   document.getElementById('results').classList.add('show');
+
+  // Animate seals in sequence: FH → FC → AP → combo
+  const toStamp = [];
+  if(isFH)     toStamp.push({ id:'seal-fh', cls:'earned-fh', label:'Full Health' });
+  if(isFC)     toStamp.push({ id:'seal-fc', cls:'earned-fc', label:'Full Combo'  });
+  if(isAP)     toStamp.push({ id:'seal-ap', cls:'earned-ap', label:'All Perfect' });
+  if(cbTier>0) toStamp.push({ id:'seal-cb', cls:'earned-cb', label:['','Combo 50','Combo 100','Combo 200'][cbTier] });
+
+  const caption = document.getElementById('badges-caption');
+
+  function showCaption(text, cb) {
+    caption.textContent = text;
+    caption.className = 'cap-in';
+    setTimeout(() => {
+      caption.className = 'cap-out';
+      setTimeout(() => { caption.className=''; caption.textContent=''; cb(); }, 300);
+    }, 900);
+  }
+
+  function stampNext(i) {
+    if(i >= toStamp.length) return;
+    const { id, cls, label } = toStamp[i];
+    const el = document.getElementById(id);
+    el.classList.remove('dim');
+    el.classList.add(cls, 'stamping');
+    setTimeout(() => el.classList.remove('stamping'), 500);
+    showCaption(label, () => stampNext(i + 1));
+  }
+  setTimeout(() => stampNext(0), 600);
 
   // Save to server
   try {

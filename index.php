@@ -66,7 +66,10 @@ header { text-align:center; }
   transform:translate(-50%,-50%) translate3d(0,0,80px) scale(1.06);
   opacity:1; border-color:var(--purple);
   box-shadow:0 0 28px rgba(188,19,254,.35),0 20px 50px rgba(0,0,0,.6);
-  z-index:10;
+  z-index:10; will-change:transform;
+}
+.song-card[data-pos="0"].gyro-active {
+  transition: box-shadow .3s, border-color .3s, opacity .3s;
 }
 .song-card[data-pos="1"] {
   transform:translate(-50%,-50%) translate3d(215px,20px,-80px) rotateY(-18deg) scale(.87);
@@ -338,21 +341,23 @@ footer {
 
 <script>
 (function fixViewportHeight() {
+  const supportsDvh = CSS.supports('height', '100dvh');
   const setVH = () => {
-    // Primero intentamos con dvh si es soportado
-    if (CSS.supports('height', '100dvh')) {
+    if (supportsDvh) {
+      // dvh ya se actualiza solo — solo necesitamos settearlo una vez
       document.documentElement.style.setProperty('--real-height', '100dvh');
     } else {
-      // Fallback para navegadores antiguos
+      // Fallback: recalcular con innerHeight en cada resize/orientationchange
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
-      document.documentElement.style.setProperty('--real-height', 'calc(var(--vh, 1vh) * 100)');
+      document.documentElement.style.setProperty('--real-height', `${window.innerHeight}px`);
     }
   };
-  
   setVH();
-  window.addEventListener('resize', setVH);
-  window.addEventListener('orientationchange', () => setTimeout(setVH, 100));
+  if (!supportsDvh) {
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', () => setTimeout(setVH, 100));
+  }
 })();
 
 const DIFF_COLORS = { easy:'#00ff88', normal:'#00f2ff', hard:'#ff3131' };
@@ -366,8 +371,6 @@ const bgCanvas = document.getElementById('bg-canvas');
 const bgCtx = bgCanvas.getContext('2d');
 let bgOff = 0;
 function drawBg() {
-  // Usar window.innerHeight pero en realidad queremos usar dvh
-  // Para el canvas de fondo, podemos mantener innerHeight ya que es solo fondo
   bgCanvas.width = window.innerWidth;
   bgCanvas.height = window.innerHeight;
   const W = bgCanvas.width, H = bgCanvas.height;
@@ -380,19 +383,6 @@ function drawBg() {
   for(let x=0;x<W;x+=80){ bgCtx.beginPath(); bgCtx.moveTo(x,0); bgCtx.lineTo(x,H); bgCtx.stroke(); }
 }
 (function loop(){ drawBg(); requestAnimationFrame(loop); })();
-
-// Añadir listener para cuando cambie el viewport (ej. cuando se oculta la barra)
-window.addEventListener('resize', () => {
-  // Forzar recálculo de altura si es necesario
-  document.documentElement.style.setProperty('--real-height', window.innerHeight + 'px');
-});
-
-// También escuchar el evento orientationchange
-window.addEventListener('orientationchange', () => {
-  setTimeout(() => {
-    document.documentElement.style.setProperty('--real-height', window.innerHeight + 'px');
-  }, 100);
-});
 
 // ── Load songs ────────────────────────────────────────────────────────────────
 async function loadSongs() {
@@ -482,11 +472,14 @@ function updatePositions() {
   document.querySelectorAll('.song-card').forEach(card => {
     const idx = parseInt(card.dataset.idx);
     let pos = idx - currentIdx;
-    // Wrap around for circular navigation
     if (pos >  total / 2) pos -= total;
     if (pos < -total / 2) pos += total;
-    // Only -1, 0, 1 are visible — everything else is 'far'
     card.dataset.pos = (Math.abs(pos) > 1) ? 'far' : pos.toString();
+    // Clear gyro inline transform on any card that's no longer center
+    if(pos !== 0) {
+      card.style.transform = '';
+      card.classList.remove('gyro-active');
+    }
   });
 }
 
@@ -712,9 +705,55 @@ function deterministicGradient(title){
   return `linear-gradient(135deg,hsl(${h1},75%,22%),hsl(${h2},85%,12%))`;
 }
 
+// ── Gyroscope tilt ───────────────────────────────────────────────────────────
+let gyroSupported = false;
+let currentTilt = { x:0, y:0 };
+let targetTilt  = { x:0, y:0 };
+let gyroLoopRunning = false;
+
+function handleGyro(e) {
+  const gamma = e.gamma || 0;           // left/right  -90..90
+  const beta  = e.beta  || 0;           // fwd/back  -180..180
+  targetTilt.x = Math.max(-20, Math.min(20, gamma * 0.5));
+  targetTilt.y = Math.max(-14, Math.min(14, (beta - 90) * 0.3));
+}
+
+function startGyroLoop() {
+  if(gyroLoopRunning) return;
+  gyroLoopRunning = true;
+  (function loop() {
+    currentTilt.x += (targetTilt.x - currentTilt.x) * 0.1;
+    currentTilt.y += (targetTilt.y - currentTilt.y) * 0.1;
+    const card = document.querySelector('.song-card[data-pos="0"]');
+    if(card) {
+      card.classList.add('gyro-active');
+      card.style.transform = `translate(-50%,-50%) translate3d(0,0,80px) scale(1.06) rotateX(${currentTilt.y.toFixed(2)}deg) rotateY(${currentTilt.x.toFixed(2)}deg)`;
+    }
+    requestAnimationFrame(loop);
+  })();
+}
+
+function initGyro() {
+  if(!window.DeviceOrientationEvent) return;
+  if(typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // iOS 13+ — request permission on user gesture (called from dismissSplash)
+    DeviceOrientationEvent.requestPermission()
+      .then(state => {
+        if(state === 'granted') {
+          gyroSupported = true;
+          window.addEventListener('deviceorientation', handleGyro, {passive:true});
+          startGyroLoop();
+        }
+      }).catch(()=>{});
+  } else {
+    // Android — no permission needed
+    gyroSupported = true;
+    window.addEventListener('deviceorientation', handleGyro, {passive:true});
+    startGyroLoop();
+  }
+}
+
 // ── Splash dismiss ────────────────────────────────────────────────────────────
-// The browser requires an explicit user gesture before AudioContext can play.
-// If coming back from the game page, the gesture already happened — skip splash.
 const splash = document.getElementById('splash');
 const fromGame = new URLSearchParams(window.location.search).get('from') === 'game';
 
@@ -723,7 +762,8 @@ function dismissSplash() {
   splash.removeEventListener('keydown',     dismissSplash);
   getAC().resume();
   audioUnlocked = true;
-  loadUISounds();   // load navigate/diffsel/start sounds
+  loadUISounds();
+  initGyro();   // request gyro permission + start loop
   splash.classList.add('hide');
   setTimeout(() => splash.style.display = 'none', 650);
   schedulePreview();
@@ -734,6 +774,7 @@ if (fromGame) {
   audioUnlocked = true;
   getAC().resume();
   loadUISounds();
+  initGyro();   // already have gesture from previous page
 } else {
   splash.addEventListener('pointerdown', dismissSplash);
   splash.addEventListener('keydown',     dismissSplash);

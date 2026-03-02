@@ -23,18 +23,25 @@ rhythm-nova/
 │       ├── audio.mp3          ← Audio (mp3, ogg, wav o m4a)
 │       └── cover.jpg          ← Portada (jpg, png o webp — opcional)
 ├── assets/
-│   └── sounds/                ← Efectos de sonido (todos opcionales)
-│       ├── navigate.ogg/mp3
-│       ├── diffsel.ogg/mp3
-│       ├── start.ogg/mp3
-│       ├── cd3.ogg/mp3
-│       ├── cd2.ogg/mp3
-│       ├── cd1.ogg/mp3
-│       ├── go.ogg/mp3
-│       ├── hit.ogg/mp3
-│       ├── bad.ogg/mp3
-│       ├── miss.ogg/mp3
-│       └── results.ogg/mp3
+│   ├── sounds/                ← Efectos de sonido (todos opcionales)
+│   │   ├── navigate.ogg/mp3
+│   │   ├── diffsel.ogg/mp3
+│   │   ├── start.ogg/mp3
+│   │   ├── cd3.ogg/mp3
+│   │   ├── cd2.ogg/mp3
+│   │   ├── cd1.ogg/mp3
+│   │   ├── go.ogg/mp3
+│   │   ├── hit.ogg/mp3
+│   │   ├── bad.ogg/mp3
+│   │   ├── miss.ogg/mp3
+│   │   └── results.ogg/mp3
+│   └── images/                ← Imágenes de sellos de mérito (opcionales)
+│       ├── full_health.png
+│       ├── full_combo.png
+│       ├── all_perfect.png
+│       ├── combo_50.png
+│       ├── combo_100.png
+│       └── combo_200.png
 └── data/
     └── scores.json            ← Puntuaciones (generado automáticamente)
 ```
@@ -52,7 +59,9 @@ rhythm-nova/
    ```
 3. Accede a `http://tu-servidor/rhythm-nova/`
 
-> El juego funciona sin audio externo ni portadas — todo tiene fallbacks integrados.
+Para desarrollo en LAN con móvil se recomienda HTTPS (ver sección más abajo).
+
+> El juego funciona sin audio externo, portadas ni imágenes de sellos — todo tiene fallbacks integrados.
 
 ---
 
@@ -140,7 +149,7 @@ Desliza el dedo en la dirección indicada por el color de la nota:
 - **Naranja** (extensión a la izquierda) → swipe izquierda
 - **Verde** (extensión a la derecha) → swipe derecha
 
-Umbral: ≥40px de desplazamiento horizontal en ≤300ms. Se detecta en `touchmove` (respuesta inmediata al superar el umbral) y en `touchend`. En escritorio usa `←` / `→`.
+Umbral: ≥40px de desplazamiento horizontal en ≤300ms. Se detecta en `touchmove` (respuesta inmediata) y en `touchend`. En escritorio usa `←` / `→`.
 
 | Acción | Resultado |
 |---|---|
@@ -163,6 +172,56 @@ Umbral: ≥40px de desplazamiento horizontal en ≤300ms. Se detecta en `touchmo
 
 **Ranking final:** S ≥95% · A ≥85% · B ≥70% · C ≥50% · D <50%
 (porcentaje de perfects + goods sobre el total de notas)
+
+---
+
+## Health bar
+
+La barra de salud aparece entre la cabecera y el área de juego. Empieza al 70%.
+
+| Juicio | Efecto en salud |
+|---|---|
+| PERFECT | +3 |
+| GOOD | +1 |
+| BAD | −8 |
+| MISS | −15 |
+
+**Estados visuales:** verde (>50%) · amarillo (26–50%) · rojo pulsante + temblor (1–25%) · glow verde cuando llega al 100%.
+
+Si la salud llega a 0 aparece la pantalla **FAILED** con opciones de Retry y Menú.
+
+---
+
+## Pantalla de resultados
+
+Muestra score, max combo, perfects, misses, accuracy con barra segmentada (perfect/good/bad/miss) y ranking.
+
+### Sellos de mérito
+
+Cuatro sellos siempre visibles (apagados si no se consiguieron). Los conseguidos se estampan en secuencia con animación al finalizar la canción:
+
+| Sello | Condición |
+|---|---|
+| 💚 Full Health | Terminar con 100% de vida |
+| ◆ Full Combo | Sin misses ni bads (perfects + goods) |
+| ★ All Perfect | Solo perfects |
+| 🔥 Combo | Máximo combo alcanzado: 🥉 ×50 · 🥈 ×100 · 🥇 ×200 |
+
+Los sellos pueden personalizarse con imágenes PNG en `assets/images/` (ver estructura de carpetas). Si no existen, se muestran los emojis como fallback.
+
+### Feedback táctil
+
+En Android, las notas PERFECT generan una vibración corta (35ms) y GOOD una más suave (15ms). Requiere que la **respuesta táctil** esté activada en Ajustes del sistema y que el sitio sirva por **HTTPS**.
+
+---
+
+## Menú principal
+
+El carrusel 3D muestra las canciones disponibles con portada, BPM, duración, dificultades disponibles y mejor puntuación guardada.
+
+### Giroscopio
+
+En móviles Android la card central reacciona al movimiento del dispositivo con un efecto de inclinación 3D. En iOS 13+ se solicita permiso al tocar la pantalla inicial.
 
 ---
 
@@ -219,8 +278,6 @@ Umbral: ≥40px de desplazamiento horizontal en ≤300ms. Se detecta en `touchmo
 ## Multi-carril
 
 La pantalla se divide en N zonas táctiles verticales. Tocar en la zona equivocada mientras pasa una nota de otro carril no genera ningún juicio — la nota permanece activa hasta que su ventana de timing expira y se cuenta como MISS.
-
-Las notas se colorean según su carril en juego y editor:
 
 | Carril | Color |
 |---|---|
@@ -279,6 +336,32 @@ results   → "Short 4-note victory jingle, electronic synth, upbeat and satisfy
 > - Efectos cortos: **ElevenLabs Sound Effects** — elevenlabs.io/sound-effects
 > - Jingle de resultados: **Udio** — udio.com
 > - Biblioteca gratuita: **Freesound.org** (Creative Commons)
+
+---
+
+## HTTPS en desarrollo local (LAN)
+
+Algunas APIs del navegador (vibración, giroscopio en iOS) requieren HTTPS. Para desarrollo en LAN con EasyPHP:
+
+1. Instala **mkcert** y genera certificados para tu IP:
+   ```bash
+   mkcert -install
+   mkcert 192.168.1.XX localhost 127.0.0.1
+   ```
+2. Copia los `.pem` a `conf/ssl/` dentro de Apache
+3. Añade al `httpd.conf`:
+   ```apache
+   LoadModule ssl_module modules/mod_ssl.so
+   LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
+   Listen 443
+   <VirtualHost 192.168.1.XX:443>
+     DocumentRoot "ruta/eds-www"
+     SSLEngine on
+     SSLCertificateFile    "conf/ssl/192.168.1.XX+2.pem"
+     SSLCertificateKeyFile "conf/ssl/192.168.1.XX+2-key.pem"
+   </VirtualHost>
+   ```
+4. Instala el certificado raíz de mkcert en Android: `%LOCALAPPDATA%/mkcert/rootCA.pem` → Ajustes → Seguridad → Instalar certificado CA
 
 ---
 
