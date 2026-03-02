@@ -1,0 +1,26 @@
+{
+    "fc5542b1-df84-4237-b248-5304ce0cded8": {
+        "normal": {
+            "score": 58270,
+            "combo": 87,
+            "rank": "A",
+            "perfects": 119,
+            "goods": 16,
+            "bads": 2,
+            "misses": 1,
+            "date": "2026-03-01 20:21:52"
+        }
+    },
+    "29e95a0e-7872-4435-b27c-752e8ef07222": {
+        "normal": {
+            "score": 137690,
+            "combo": 123,
+            "rank": "A",
+            "perfects": 228,
+            "goods": 57,
+            "bads": 4,
+            "misses": 1,
+            "date": "2026-02-27 21:04:30"
+        }
+    }
+}
