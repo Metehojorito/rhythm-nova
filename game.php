@@ -200,7 +200,61 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
   50%       { box-shadow: 0 0 25px var(--red), 0 0 50px rgba(255, 49, 49, 0.8); }
 }
 
+/* PAUSE screen */
+#pause-screen {
+  position:fixed; inset:0; z-index:78;
+  display:none; flex-direction:column; align-items:center; justify-content:center; gap:20px;
+  background:rgba(5,5,8,.88); backdrop-filter:blur(10px);
+}
+#pause-screen.show { display:flex; animation:fade-in .2s ease; }
+#pause-screen h2 {
+  font-family:'Orbitron',monospace; font-size:42px; font-weight:900; letter-spacing:6px;
+  color:#fff; text-shadow:0 0 20px rgba(255,255,255,.3);
+  margin-bottom:8px;
+}
+#pause-screen p { font-size:10px; letter-spacing:4px; color:rgba(255,255,255,.25); text-transform:uppercase; margin-top:-12px; }
+.pause-btns { display:flex; flex-direction:column; gap:10px; align-items:center; width:220px; }
+.pause-btn {
+  width:100%; padding:13px 0; border-radius:50px;
+  font-family:'Orbitron',monospace; font-size:11px; font-weight:700; letter-spacing:2px;
+  cursor:pointer; transition:all .2s; text-align:center;
+}
+
 /* FAILED screen */
+/* ── ACHIEVEMENT TOAST ── */
+#ach-toast {
+  position:fixed; bottom:24px; right:-340px; z-index:200;
+  width:300px; background:rgba(10,10,20,.95);
+  border:1px solid rgba(0,242,255,.3);
+  border-left:3px solid var(--cyan);
+  border-radius:8px; padding:12px 14px;
+  display:flex; align-items:center; gap:12px;
+  transition:right .4s cubic-bezier(.2,0,.2,1);
+  box-shadow:0 4px 24px rgba(0,0,0,.6), 0 0 20px rgba(0,242,255,.1);
+}
+#ach-toast.show { right:16px; }
+#ach-toast-icon {
+  width:52px; height:52px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+#ach-toast-icon img {
+  width:52px; height:52px; object-fit:contain;
+}
+#ach-toast-text { flex:1; min-width:0; }
+#ach-toast-label {
+  font-family:'Orbitron',monospace; font-size:8px;
+  letter-spacing:2px; color:var(--cyan); margin-bottom:3px;
+}
+#ach-toast-title {
+  font-family:'Orbitron',monospace; font-size:12px;
+  font-weight:700; color:#fff; margin-bottom:3px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#ach-toast-desc {
+  font-size:10px; color:rgba(255,255,255,.5);
+  line-height:1.4;
+}
+
 #failed-screen {
   position:fixed; inset:0; z-index:75;
   display:none; flex-direction:column; align-items:center; justify-content:center; gap:18px;
@@ -310,7 +364,7 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
 .seal {
   width:52px; height:52px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  font-size:22px; border:2px solid rgba(255,255,255,.1);
+  font-size:22px; border:2px solid transparent;
   position:relative; flex-shrink:0;
   transition: box-shadow .3s, border-color .3s;
   overflow:hidden;
@@ -324,10 +378,10 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
 .seal.dim { filter:grayscale(1) brightness(0.25); }
 
 /* earned colors */
-.seal.earned-fh { border-color:var(--green);  box-shadow:0 0 14px rgba(0,255,136,.5);  filter:none; }
-.seal.earned-fc { border-color:var(--cyan);   box-shadow:0 0 14px rgba(0,242,255,.5);  filter:none; }
-.seal.earned-ap { border-color:var(--gold);   box-shadow:0 0 14px rgba(255,204,0,.5);  filter:none; }
-.seal.earned-cb { border-color:var(--purple); box-shadow:0 0 14px rgba(188,19,254,.5); filter:none; }
+.seal.earned-fh { box-shadow:0 0 14px rgba(0,255,136,.5);  filter:none; }
+.seal.earned-fc { box-shadow:0 0 14px rgba(0,242,255,.5);  filter:none; }
+.seal.earned-ap { box-shadow:0 0 14px rgba(255,204,0,.5);  filter:none; }
+.seal.earned-cb { box-shadow:0 0 14px rgba(188,19,254,.5); filter:none; }
 
 /* shared label strip below row */
 #badges-caption {
@@ -384,6 +438,18 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
   <div id="cd-go">GO!</div>
 </div>
 
+<!-- ACHIEVEMENT TOAST -->
+<div id="ach-toast">
+  <div id="ach-toast-icon">
+    <img id="ach-toast-img" src="" alt="">
+  </div>
+  <div id="ach-toast-text">
+    <div id="ach-toast-label">LOGRO DESBLOQUEADO</div>
+    <div id="ach-toast-title"></div>
+    <div id="ach-toast-desc"></div>
+  </div>
+</div>
+
 <!-- FAILED -->
 <div id="failed-screen">
   <h2>FAILED</h2>
@@ -391,6 +457,17 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
   <div style="display:flex;gap:10px;margin-top:8px;">
     <button onclick="retryGame()" class="res-btn" style="border:1px solid var(--purple);background:rgba(188,19,254,.1);color:#fff;">↺ &nbsp;RETRY</button>
     <a href="javascript:returnToMenu()" class="res-btn" style="border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;text-decoration:none;">☰ &nbsp;MENÚ</a>
+  </div>
+</div>
+
+<!-- PAUSE -->
+<div id="pause-screen">
+  <h2>PAUSA</h2>
+  <p>El juego está en pausa</p>
+  <div class="pause-btns">
+    <button class="pause-btn" onclick="resumeGame()" style="border:1px solid var(--cyan);background:rgba(0,242,255,.1);color:var(--cyan);">▶ &nbsp;CONTINUAR</button>
+    <button class="pause-btn" onclick="retryGame()" style="border:1px solid var(--purple);background:rgba(188,19,254,.1);color:#fff;">↺ &nbsp;REINTENTAR</button>
+    <button class="pause-btn" onclick="returnToMenu()" style="border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);">☰ &nbsp;MENÚ</button>
   </div>
 </div>
 
@@ -404,7 +481,7 @@ body { background:var(--bg); overflow:hidden; height:100vh; width:100vw; font-fa
 <!-- BACK BTN -->
 
 <!-- GAME -->
-<button id="back-btn" onclick="returnToMenu()" title="Volver">←</button>
+<button id="back-btn" onclick="pauseGame()" title="Pausa">⏸</button>
 <div id="fps-counter" onclick="this.classList.toggle('visible')">— fps</div>
 <div id="game-wrap">
   <div id="hud">
@@ -565,6 +642,11 @@ const touchOrigin = [null, null, null];
 const FLICK_THRESHOLD_PX  = 40;   // min horizontal travel
 const FLICK_THRESHOLD_MS  = 300;  // max time to complete swipe
 
+// Double tap detection
+const laneTouchCount = [0, 0, 0];       // active fingers per lane
+const DTAP_WINDOW_MS  = 80;             // ms tolerance for simultaneous
+const dtapPending     = [null, null, null]; // {time} of first touch
+
 // Per-lane colors matching editor
 const LANE_COLORS = ['#00f2ff', '#a855f7', '#10b981'];
 
@@ -627,9 +709,12 @@ function buildTapZone() {
     // ── MOUSE ──
     zone.addEventListener('mousedown', e => {
       touchOrigin[lane] = { x: e.clientX, time: performance.now() };
-      handleTap(lane);
+      laneTouchCount[lane]++;
+      if(laneTouchCount[lane] >= 2) { handleDtap(lane); dtapPending[lane]=null; }
+      else { handleTap(lane); }
     });
     zone.addEventListener('mouseup', e => {
+      laneTouchCount[lane] = 0;
       const origin = touchOrigin[lane];
       if(origin){
         const dx = e.clientX - origin.x;
@@ -646,7 +731,18 @@ function buildTapZone() {
       e.preventDefault();
       const t = e.changedTouches[0];
       touchOrigin[lane] = { x: t.clientX, time: performance.now() };
-      handleTap(lane);
+      const laneRect = zone.getBoundingClientRect();
+      let fingersInLane = 0;
+      for(let i = 0; i < e.touches.length; i++) {
+        const tx = e.touches[i].clientX;
+        if(tx >= laneRect.left && tx <= laneRect.right) fingersInLane++;
+      }
+      console.log(`[dtap] lane=${lane} totalTouches=${e.touches.length} fingersInLane=${fingersInLane} rect=${Math.round(laneRect.left)}-${Math.round(laneRect.right)}`);
+      if(fingersInLane >= 2) {
+        handleDtap(lane);
+      } else {
+        handleTap(lane);
+      }
     }, { passive: false });
 
     // touchmove: fire flick early if threshold crossed (responsive feel)
@@ -698,14 +794,26 @@ function getCtx() {
 }
 
 // Try ogg then mp3
+<?php
+// Build list of available sound files so JS never requests missing ones
+$soundDir = __DIR__ . "/assets/sounds/";
+$available = [];
+if(is_dir($soundDir)) {
+  foreach(glob($soundDir . "*.{ogg,mp3}", GLOB_BRACE) as $f)
+    $available[] = basename($f);
+}
+?>
+const AVAILABLE_SOUNDS = new Set(<?= json_encode($available) ?>);
+
 async function tryLoadSound(base) {
   const ctx = getCtx();
-  for (const ext of ['ogg','mp3']) {
+  for (const ext of ["ogg","mp3"]) {
+    const filename = base.split("/").pop() + "." + ext;
+    if(!AVAILABLE_SOUNDS.has(filename)) continue;
     try {
       const res = await fetch(`${base}.${ext}`);
-      if (!res.ok) continue;
+      if(!res.ok) continue;
       const buf = await ctx.decodeAudioData(await res.arrayBuffer());
-      console.log(`✓ ${base}.${ext}`);
       return buf;
     } catch(e) {}
   }
@@ -783,6 +891,8 @@ function vibrate(ms) {
 
 function updateHealth(delta) {
   health = Math.max(0, Math.min(HEALTH_MAX, health + delta));
+  if(health < minHealthThisRun) minHealthThisRun = health;
+  if(health < 10) hadBelowTenPct = true;
   const bar   = document.getElementById('health-bar');
   const track = document.getElementById('health-track');
   bar.style.width = health + '%';
@@ -803,6 +913,7 @@ function updateHealth(delta) {
 function triggerFailed() {
   isRunning = false;
   stopSong();
+  savePartialStats();
   document.getElementById('failed-screen').classList.add('show');
 }
 
@@ -1064,6 +1175,66 @@ function drawFlickNote(x, y, alpha, missed, direction) {
 }
 
 // ══════════════════════════════════════════
+//  DTAP NOTE DRAWING
+// ══════════════════════════════════════════
+function drawDtapNote(x, y, alpha, missed, lane=0) {
+  const col  = '#eab308';
+  const col2 = '#fbbf24';
+  const r    = 16;
+  const sep  = r * 0.65; // horizontal offset of each diamond from center
+  nCtx.save();
+  nCtx.globalAlpha = missed ? alpha * 0.25 : alpha;
+  nCtx.translate(x, y);
+
+  if(!missed) {
+    // ambient glow
+    const g = nCtx.createRadialGradient(0,0,r*.5,0,0,r*2.6);
+    g.addColorStop(0,'rgba(234,179,8,0.3)'); g.addColorStop(1,'rgba(0,0,0,0)');
+    nCtx.beginPath(); nCtx.arc(0,0,r*2.6,0,Math.PI*2); nCtx.fillStyle=g; nCtx.fill();
+  }
+
+  // two diamonds
+  [-1, 1].forEach(dir => {
+    const dx = dir * sep;
+    const dr = r * 0.78;
+    if(missed) {
+      nCtx.fillStyle = '#1a1a1a'; nCtx.strokeStyle = '#2a2a2a';
+    } else {
+      const dg = nCtx.createLinearGradient(dx,-dr,dx,dr);
+      dg.addColorStop(0,'#fff'); dg.addColorStop(0.4, col); dg.addColorStop(1, col2);
+      nCtx.fillStyle = dg;
+      nCtx.strokeStyle = 'rgba(255,255,255,.55)';
+    }
+    nCtx.lineWidth = 1.5;
+    nCtx.beginPath();
+    nCtx.moveTo(dx,      -dr);
+    nCtx.lineTo(dx+dr,    0);
+    nCtx.lineTo(dx,       dr);
+    nCtx.lineTo(dx-dr,    0);
+    nCtx.closePath();
+    nCtx.fill(); nCtx.stroke();
+    // inner highlight
+    if(!missed) {
+      nCtx.fillStyle = 'rgba(255,255,255,.55)';
+      nCtx.beginPath();
+      nCtx.moveTo(dx,     -dr*.42); nCtx.lineTo(dx+dr*.28, 0);
+      nCtx.lineTo(dx,      dr*.42); nCtx.lineTo(dx-dr*.28, 0);
+      nCtx.closePath(); nCtx.fill();
+    }
+  });
+
+  // "2" label in the center
+  if(!missed) {
+    nCtx.fillStyle = '#fff';
+    nCtx.globalAlpha = alpha * 0.9;
+    nCtx.font = `bold ${Math.round(r*0.72)}px Orbitron,monospace`;
+    nCtx.textAlign = 'center'; nCtx.textBaseline = 'middle';
+    nCtx.fillText('2', 0, 0);
+  }
+  nCtx.restore();
+}
+
+// ══════════════════════════════════════════
 //  HOLD NOTE DRAWING
 // ══════════════════════════════════════════
 function drawHoldNote(x, yHead, yTail, alpha, lane, holdProgress, isActive) {
@@ -1313,6 +1484,20 @@ function gameLoop() {
       return;
     }
 
+    // ── DTAP NOTE ──
+    if(note.type === 'dtap') {
+      if(!note.missed && ttH < -TIMING.bad){
+        note.missed=true; misses++; combo=0;
+        updateHealth(HEALTH_DELTA.miss);
+        updateCombo(); showFeedback('MISS','miss'); playHit('miss');
+      }
+      if(yHead>-40 && yHead<lH+40) {
+        drawDtapNote(x, yHead, Math.max(0,alpha), note.missed, note.lane);
+        if(!note.missed && alpha > 0.1) spawnTrail(x, yHead, note.lane);
+      }
+      return;
+    }
+
     // ── NORMAL NOTE ──
     if(!note.missed && ttH < -TIMING.bad){
       note.missed=true; misses++; combo=0;
@@ -1342,7 +1527,7 @@ function resolveHold(note, reason) {
   combo++; if(combo>maxCombo) maxCombo=combo;
   let type, label, cls, pts;
   if(reason === 'completed') {
-    type='perfect'; label='PERFECT'; cls='perfect'; pts=150; perfects++;
+    type='perfect'; label='PERFECT'; cls='perfect'; pts=150; perfects++; runHoldPerfect++;
   } else {
     // Early release: how much was left?
     const remaining = note.duration - (note.holdProgress * note.duration);
@@ -1360,6 +1545,34 @@ function resolveHold(note, reason) {
 // ══════════════════════════════════════════
 //  INPUT
 // ══════════════════════════════════════════
+// handleDtap: fires when 2 simultaneous touches detected on same lane
+function handleDtap(lane=0) {
+  if(!isRunning) return;
+  const elapsed = performance.now() - gameStartTime;
+
+  // If first finger already set a pending, use that note and diff
+  const pending = dtapPending[lane];
+  if(pending && !pending.note.hit) {
+    dtapPending[lane] = null;
+    processHit(pending.note, pending.diff);
+    return;
+  }
+
+  // Otherwise find closest dtap note directly
+  let closest=null, minDiff=Infinity;
+  notes.forEach(n=>{
+    if(n.hit || n.missed) return;
+    if(n.type !== 'dtap') return;
+    if(LANE_COUNT > 1 && n.lane !== lane) return;
+    const d = Math.abs(elapsed - n.time);
+    if(d < minDiff){ minDiff=d; closest=n; }
+  });
+
+  if(!closest || minDiff >= TIMING.bad) return;
+  dtapPending[lane] = null;
+  processHit(closest, minDiff);
+}
+
 // handleTap: fires on press (touchstart/mousedown)
 // Only handles normal and hold notes. Flick notes are SKIPPED here —
 // they're evaluated in handleFlick() after the swipe is confirmed.
@@ -1383,6 +1596,24 @@ function handleTap(lane=0) {
   });
 
   if(!closest || minDiff >= TIMING.bad) return;
+
+  // First tap on dtap note — wait DTAP_WINDOW_MS for second finger
+  if(closest.type === 'dtap') {
+    dtapPending[lane] = { note: closest, diff: minDiff, time: performance.now() };
+    setTimeout(() => {
+      const p = dtapPending[lane];
+      if(p && !p.note.hit) {
+        // Second finger never came — mark as BAD
+        p.note.hit=true; bads++; combo=0;
+        score += NOTE_SCORES.dtap.bad;
+        updateHealth(HEALTH_DELTA.bad);
+        updateScore(); updateCombo(); showFeedback('BAD','bad'); playHit('bad');
+        spawnParticles(laneX(p.note.lane, noteCanvas.width), hitY, 'bad', p.note.lane);
+        dtapPending[lane] = null;
+      }
+    }, DTAP_WINDOW_MS);
+    return;
+  }
 
   if(closest.type === 'hold') {
     closest.holdStarted  = true;
@@ -1431,12 +1662,230 @@ function handleRelease(lane=0) {
   touchOrigin[lane] = null;
 }
 
+const NOTE_SCORES = {
+  tap:   { perfect:100, good:50,  bad:10 },
+  flick: { perfect:120, good:60,  bad:10 },
+  dtap:  { perfect:120, good:60,  bad:10 },
+};
+
+
+// ══════════════════════════════════════════
+//  ACHIEVEMENT SYSTEM
+// ══════════════════════════════════════════
+const ACHIEVEMENTS = [
+  // ── Primera vez ──
+  { id:'first_song',       title:'Primera canción',          desc:'Completa tu primera canción',                          img:'ach_first_song.png'       },
+  { id:'first_dual',       title:'Dual Lane',                desc:'Completa tu primera canción con 2 carriles',           img:'ach_first_dual.png'       },
+  { id:'first_triple',     title:'Triple Lane',              desc:'Completa tu primera canción con 3 carriles',           img:'ach_first_triple.png'     },
+  // ── Hard ──
+  { id:'hard_1',           title:'Hard x1',                  desc:'Completa 1 canción en difícil',                        img:'ach_hard_1.png'           },
+  { id:'hard_5',           title:'Hard x5',                  desc:'Completa 5 canciones en difícil',                      img:'ach_hard_5.png'           },
+  { id:'hard_10',          title:'Hard x10',                 desc:'Completa 10 canciones en difícil',                     img:'ach_hard_10.png'          },
+  { id:'hard_flawless',    title:'Hard Flawless',            desc:'Completa una canción en difícil sin ningún fallo',      img:'ach_hard_flawless.png'    },
+  { id:'comeback',         title:'Comeback',                 desc:'En difícil: llega al 100% de vida habiendo tenido menos del 10%', img:'ach_comeback.png' },
+  // ── Habilidad ──
+  { id:'untouchable',      title:'Untouchable',              desc:'Completa una canción sin perder vida',                  img:'ach_untouchable.png'      },
+  { id:'last_breath',      title:'Last Breath',              desc:'Gana una canción con la vida al mínimo (≤5%)',          img:'ach_last_breath.png'      },
+  { id:'all_perfect',      title:'All Perfect',              desc:'Completa una canción con All Perfect',                  img:'ach_all_perfect.png'      },
+  { id:'precision',        title:'Precision',                desc:'En difícil: completa con más del 98% de accuracy',      img:'ach_precision.png'        },
+  // ── Combo ──
+  { id:'combo_50',         title:'Combo 50',                 desc:'Alcanza un combo de 50',                               img:'ach_combo_50.png'         },
+  { id:'combo_100',        title:'Combo 100',                desc:'Alcanza un combo de 100',                              img:'ach_combo_100.png'        },
+  { id:'combo_150_dual',   title:'Combo 150 ×2',            desc:'Combo de 150 en una canción de 2 carriles',             img:'ach_combo_150_dual.png'   },
+  { id:'combo_100_triple', title:'Combo 100 ×3',            desc:'Combo de 100 en una canción de 3 carriles',             img:'ach_combo_100_triple.png' },
+  { id:'combo_200',        title:'Combo 200',                desc:'Alcanza un combo de 200',                              img:'ach_combo_200.png'        },
+  { id:'combo_300',        title:'Combo 300',                desc:'Alcanza un combo de 300',                              img:'ach_combo_300.png'        },
+  // ── Flick ──
+  { id:'flick_500',        title:'Flick 500',                desc:'500 Flick perfectos acumulados',                       img:'ach_flick_500.png'        },
+  { id:'flick_1000',       title:'Flick 1000',               desc:'1000 Flick perfectos acumulados',                      img:'ach_flick_1000.png'       },
+  { id:'flick_1500',       title:'Flick 1500',               desc:'1500 Flick perfectos acumulados',                      img:'ach_flick_1500.png'       },
+  { id:'flick_2000',       title:'Flick 2000',               desc:'2000 Flick perfectos acumulados',                      img:'ach_flick_2000.png'       },
+  // ── Hold ──
+  { id:'hold_500',         title:'Hold 500',                 desc:'500 Hold perfectos acumulados',                        img:'ach_hold_500.png'         },
+  { id:'hold_1000',        title:'Hold 1000',                desc:'1000 Hold perfectos acumulados',                       img:'ach_hold_1000.png'        },
+  { id:'hold_1500',        title:'Hold 1500',                desc:'1500 Hold perfectos acumulados',                       img:'ach_hold_1500.png'        },
+  { id:'hold_2000',        title:'Hold 2000',                desc:'2000 Hold perfectos acumulados',                       img:'ach_hold_2000.png'        },
+  // ── Double tap ──
+  { id:'dtap_500',         title:'Double 500',               desc:'500 Double Tap perfectos acumulados',                  img:'ach_dtap_500.png'         },
+  { id:'dtap_1000',        title:'Double 1000',              desc:'1000 Double Tap perfectos acumulados',                 img:'ach_dtap_1000.png'        },
+  { id:'dtap_1500',        title:'Double 1500',              desc:'1500 Double Tap perfectos acumulados',                 img:'ach_dtap_1500.png'        },
+  { id:'dtap_2000',        title:'Double 2000',              desc:'2000 Double Tap perfectos acumulados',                 img:'ach_dtap_2000.png'        },
+  // ── Canciones completadas ──
+  { id:'songs_10',         title:'10 Songs',                 desc:'Completa 10 canciones en cualquier dificultad',        img:'ach_songs_10.png'         },
+  { id:'songs_50',         title:'50 Songs',                 desc:'Completa 50 canciones',                                img:'ach_songs_50.png'         },
+  { id:'songs_150',        title:'150 Songs',                desc:'Completa 150 canciones',                               img:'ach_songs_150.png'        },
+  { id:'songs_300',        title:'300 Songs',                desc:'Completa 300 canciones',                               img:'ach_songs_300.png'        },
+  { id:'songs_500',        title:'500 Songs',                desc:'Completa 500 canciones',                               img:'ach_songs_500.png'        },
+  { id:'songs_1000',       title:'1000 Songs',               desc:'Completa 1000 canciones',                              img:'ach_songs_1000.png'       },
+];
+
+// ── Stats helpers ──────────────────────────────────────
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem('rn_stats') || '{}'); } catch(e) { return {}; }
+}
+function saveStats(s) {
+  try { localStorage.setItem('rn_stats', JSON.stringify(s)); } catch(e) {}
+}
+function loadUnlocked() {
+  try { return JSON.parse(localStorage.getItem('rn_achievements') || '{}'); } catch(e) { return {}; }
+}
+function saveUnlocked(u) {
+  try { localStorage.setItem('rn_achievements', JSON.stringify(u)); } catch(e) {}
+}
+
+// ── Per-run note type perfect counters ─────────────────
+let runFlickPerfect=0, runHoldPerfect=0, runDtapPerfect=0;
+let minHealthThisRun=100, hadBelowTenPct=false;
+
+// ── Toast queue ────────────────────────────────────────
+let _toastQueue = [];
+let _toastActive = false;
+
+function queueToast(ach) {
+  _toastQueue.push(ach);
+  if(!_toastActive) showNextToast();
+}
+
+function showNextToast() {
+  if(!_toastQueue.length) { _toastActive=false; return; }
+  _toastActive = true;
+  const ach = _toastQueue.shift();
+  const toast = document.getElementById('ach-toast');
+  const img   = document.getElementById('ach-toast-img');
+  const title = document.getElementById('ach-toast-title');
+  const desc  = document.getElementById('ach-toast-desc');
+  img.src = `assets/images/achievements/${ach.img}`;
+  img.onerror = () => { img.style.display='none'; };
+  img.style.display = 'block';
+  title.textContent = ach.title;
+  desc.textContent  = ach.desc;
+  toast.classList.add('show');
+  playAchievementSound();
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(showNextToast, 400);
+  }, 4000);
+}
+
+let achSoundBuf = null;
+async function loadAchievementSound() {
+  achSoundBuf = await tryLoadSound('assets/sounds/achievement');
+}
+function playAchievementSound() {
+  if(!achSoundBuf) return;
+  const ctx = getCtx();
+  const src = ctx.createBufferSource();
+  src.buffer = achSoundBuf;
+  src.connect(ctx.destination);
+  src.start();
+}
+
+// ── Save partial stats (exit mid-song or failed) ──────
+function savePartialStats() {
+  const stats = loadStats();
+  stats.flickPerfect = (stats.flickPerfect || 0) + runFlickPerfect;
+  stats.holdPerfect  = (stats.holdPerfect  || 0) + runHoldPerfect;
+  stats.dtapPerfect  = (stats.dtapPerfect  || 0) + runDtapPerfect;
+  stats.maxComboEver = Math.max(stats.maxComboEver || 0, maxCombo);
+  saveStats(stats);
+  // Reset so endGame doesn't double-count if canción termina después
+  runFlickPerfect=0; runHoldPerfect=0; runDtapPerfect=0;
+}
+
+// ── Check & unlock achievements after a run ────────────
+function checkAchievements(runData) {
+  const stats    = loadStats();
+  const unlocked = loadUnlocked();
+  const newlyUnlocked = [];
+
+  function unlock(id) {
+    if(unlocked[id]) return;
+    const ach = ACHIEVEMENTS.find(a=>a.id===id);
+    if(!ach) return;
+    unlocked[id] = Date.now();
+    newlyUnlocked.push(ach);
+  }
+
+  // Update cumulative stats
+  stats.totalSongs    = (stats.totalSongs    || 0) + 1;
+  stats.hardSongs     = (stats.hardSongs     || 0) + (runData.isHard ? 1 : 0);
+  stats.flickPerfect  = (stats.flickPerfect  || 0) + runData.flickPerfect;
+  stats.holdPerfect   = (stats.holdPerfect   || 0) + runData.holdPerfect;
+  stats.dtapPerfect   = (stats.dtapPerfect   || 0) + runData.dtapPerfect;
+  stats.maxComboEver  = Math.max(stats.maxComboEver || 0, runData.maxCombo);
+  if(runData.lanes===2) stats.dual2Songs  = (stats.dual2Songs  || 0) + 1;
+  if(runData.lanes===3) stats.triple3Songs = (stats.triple3Songs || 0) + 1;
+  saveStats(stats);
+
+  // ── Primera vez ──
+  if(stats.totalSongs >= 1)  unlock('first_song');
+  if(stats.dual2Songs  >= 1) unlock('first_dual');
+  if(stats.triple3Songs >= 1) unlock('first_triple');
+
+  // ── Hard ──
+  if(stats.hardSongs >= 1)  unlock('hard_1');
+  if(stats.hardSongs >= 5)  unlock('hard_5');
+  if(stats.hardSongs >= 10) unlock('hard_10');
+  if(runData.isHard && runData.misses===0 && runData.bads===0) unlock('hard_flawless');
+  if(runData.isHard && runData.hadBelowTenPct && runData.healthEnd>=100) unlock('comeback');
+
+  // ── Habilidad ──
+  if(runData.healthNeverDropped) unlock('untouchable');
+  if(runData.healthEnd <= 5 && runData.healthEnd > 0) unlock('last_breath');
+  if(runData.isAP) unlock('all_perfect');
+  if(runData.isHard && runData.accuracy >= 98) unlock('precision');
+
+  // ── Combo ──
+  if(stats.maxComboEver >= 50)  unlock('combo_50');
+  if(stats.maxComboEver >= 100) unlock('combo_100');
+  if(stats.maxComboEver >= 200) unlock('combo_200');
+  if(stats.maxComboEver >= 300) unlock('combo_300');
+  if(runData.maxCombo >= 150 && runData.lanes===2) unlock('combo_150_dual');
+  if(runData.maxCombo >= 100 && runData.lanes===3) unlock('combo_100_triple');
+
+  // ── Flick ──
+  if(stats.flickPerfect >= 500)  unlock('flick_500');
+  if(stats.flickPerfect >= 1000) unlock('flick_1000');
+  if(stats.flickPerfect >= 1500) unlock('flick_1500');
+  if(stats.flickPerfect >= 2000) unlock('flick_2000');
+
+  // ── Hold ──
+  if(stats.holdPerfect >= 500)  unlock('hold_500');
+  if(stats.holdPerfect >= 1000) unlock('hold_1000');
+  if(stats.holdPerfect >= 1500) unlock('hold_1500');
+  if(stats.holdPerfect >= 2000) unlock('hold_2000');
+
+  // ── Double tap ──
+  if(stats.dtapPerfect >= 500)  unlock('dtap_500');
+  if(stats.dtapPerfect >= 1000) unlock('dtap_1000');
+  if(stats.dtapPerfect >= 1500) unlock('dtap_1500');
+  if(stats.dtapPerfect >= 2000) unlock('dtap_2000');
+
+  // ── Canciones ──
+  if(stats.totalSongs >= 10)   unlock('songs_10');
+  if(stats.totalSongs >= 50)   unlock('songs_50');
+  if(stats.totalSongs >= 150)  unlock('songs_150');
+  if(stats.totalSongs >= 300)  unlock('songs_300');
+  if(stats.totalSongs >= 500)  unlock('songs_500');
+  if(stats.totalSongs >= 1000) unlock('songs_1000');
+
+  saveUnlocked(unlocked);
+
+  // Queue toasts for newly unlocked
+  newlyUnlocked.forEach(ach => queueToast(ach));
+}
+
 function processHit(note, diff) {
   note.hit=true; combo++; if(combo>maxCombo) maxCombo=combo;
+  const sc = NOTE_SCORES[note.type] || NOTE_SCORES.tap;
   let type,label,cls,pts;
-  if(diff<TIMING.perfect)     { type='perfect'; label='PERFECT'; cls='perfect'; pts=100; perfects++; }
-  else if(diff<TIMING.good)   { type='good';    label='GOOD';    cls='good';    pts=50;  goods++; }
-  else                        { type='bad';      label='BAD';     cls='bad';     pts=10;  bads++; combo=0; }
+  if(diff<TIMING.perfect)     {
+    type='perfect'; label='PERFECT'; cls='perfect'; pts=sc.perfect; perfects++;
+    if(note.type==='flick') runFlickPerfect++;
+    else if(note.type==='dtap') runDtapPerfect++;
+  }
+  else if(diff<TIMING.good)   { type='good';    label='GOOD';    cls='good';    pts=sc.good;    goods++; }
+  else                        { type='bad';      label='BAD';     cls='bad';     pts=sc.bad;     bads++; combo=0; }
 
   const mult = combo>=40?8:combo>=20?4:combo>=10?2:1;
   score += pts*mult;
@@ -1488,21 +1937,47 @@ function drawComboFX() {
     });
   }
 
-  // ── electric bolts ──
+  // ── electric arc (circular) ──
   comboElecTick++;
   if(comboElecA>.01 || comboBoltPts.length) {
-    if(lvl===2 && comboElecTick%4===0) {
-      for(let b=0;b<(Math.random()<.45?2:1);b++){
-        const hw=50+Math.random()*20, hh=20+Math.random()*16;
-        const segs=6+Math.floor(Math.random()*4), pts=[];
-        const sx=cx-hw, ex=cx+hw, baseY=cy+(Math.random()-.5)*hh*2;
-        for(let i=0;i<=segs;i++){const t=i/segs,jit=(i===0||i===segs)?0:(Math.random()-.5)*hh*1.4; pts.push({x:sx+(ex-sx)*t,y:baseY+jit});}
-        comboBoltPts.push({pts,life:1,dec:.08+Math.random()*.06,col:Math.random()<.3?'#fff':'#bc13fe',w:.8+Math.random()*1.6});
+    // Spawn arc bolts along the orbit radius
+    if(lvl===2 && comboElecTick%6===0) {
+      const arcR = 52 + Math.random()*12;
+      const startA = Math.random()*Math.PI*2;
+      const spanA = (Math.PI*0.3 + Math.random()*Math.PI*0.4) * (Math.random()<.5?1:-1);
+      const segs = 7+Math.floor(Math.random()*5);
+      const pts = [];
+      for(let i=0;i<=segs;i++){
+        const a = startA + spanA*(i/segs);
+        const jit = (i===0||i===segs) ? 0 : (Math.random()-.5)*9;
+        pts.push({ x: cx+(arcR+jit)*Math.cos(a), y: cy+(arcR+jit)*Math.sin(a) });
       }
+      comboBoltPts.push({pts,life:1,dec:.07+Math.random()*.05,col:Math.random()<.35?'#fff':'#bc13fe',w:.8+Math.random()*1.4});
+    }
+    // Rotating arc segments
+    comboElecA += 0;
+    const arcR2 = 55;
+    for(let i=0;i<3;i++){
+      const offset = (Math.PI*2/3)*i + comboElecTick*0.025;
+      const span = Math.PI*0.5;
+      bgCtx.save();
+      bgCtx.globalAlpha = comboElecA * 0.45;
+      bgCtx.strokeStyle = '#bc13fe';
+      bgCtx.lineWidth = 1.5;
+      bgCtx.beginPath();
+      bgCtx.arc(cx, cy, arcR2, offset, offset+span);
+      bgCtx.stroke();
+      // leading edge glow dot
+      const ex = cx+arcR2*Math.cos(offset+span);
+      const ey = cy+arcR2*Math.sin(offset+span);
+      bgCtx.globalAlpha = comboElecA * 0.8;
+      bgCtx.fillStyle = '#fff';
+      bgCtx.beginPath(); bgCtx.arc(ex,ey,2.5,0,Math.PI*2); bgCtx.fill();
+      bgCtx.restore();
     }
     comboBoltPts=comboBoltPts.filter(b=>b.life>.02);
     comboBoltPts.forEach(b=>{
-      bgCtx.save();bgCtx.globalAlpha=b.life*comboElecA*.92;bgCtx.strokeStyle=b.col;
+      bgCtx.save();bgCtx.globalAlpha=b.life*comboElecA*.9;bgCtx.strokeStyle=b.col;
       bgCtx.lineWidth=b.w*(.4+b.life*.6);bgCtx.lineCap='round';bgCtx.lineJoin='round';
       bgCtx.beginPath();b.pts.forEach((p,i)=>i===0?bgCtx.moveTo(p.x,p.y):bgCtx.lineTo(p.x,p.y));
       bgCtx.stroke();bgCtx.restore();b.life-=b.dec;
@@ -1623,7 +2098,8 @@ function runCountdown() {
 //  GAME FLOW
 // ══════════════════════════════════════════
 function resetState() {
-  score=0; combo=0; maxCombo=0; perfects=0; goods=0; bads=0; misses=0; particles=[]; trails=[]; comboOrbitPts=[]; comboBoltPts=[]; comboFirePts=[]; comboOrbitA=0; comboElecA=0; comboFireA=0; health=HEALTH_START; _prevComboLevel=0;
+  score=0; combo=0; maxCombo=0; perfects=0; goods=0; bads=0; misses=0; particles=[]; trails=[]; laneTouchCount.fill(0); dtapPending.fill(null);
+  runFlickPerfect=0; runHoldPerfect=0; runDtapPerfect=0; minHealthThisRun=100; hadBelowTenPct=false; comboOrbitPts=[]; comboBoltPts=[]; comboFirePts=[]; comboOrbitA=0; comboElecA=0; comboFireA=0; health=HEALTH_START; _prevComboLevel=0;
   const hb=document.getElementById('health-bar');
   if(hb){hb.style.width=HEALTH_START+'%';hb.classList.remove('low','danger');}
   const fs=document.getElementById('failed-screen');
@@ -1651,6 +2127,7 @@ function resetState() {
 async function startRound() {
   stopSong();
   stopResults();   // stop results jingle if replaying
+  _totalPaused = 0; _pauseStart = 0;
   resetState();
   await runCountdown();
   isRunning     = true;
@@ -1761,16 +2238,62 @@ async function endGame() {
   } catch(e) {
     console.warn('Score no guardado:', e);
   }
+
+  // Check achievements
+  const total2 = perfects+goods+bads+misses;
+  const acc2   = total2>0 ? ((perfects*100+goods*50)/(total2*100))*100 : 0;
+  checkAchievements({
+    isHard:           DIFF === 'hard',
+    lanes:            LANE_COUNT,
+    maxCombo:         maxCombo,
+    misses:           misses,
+    bads:             bads,
+    accuracy:         acc2,
+    isAP:             total2>0 && misses===0 && bads===0 && goods===0,
+    healthEnd:        health,
+    healthNeverDropped: minHealthThisRun >= HEALTH_START,
+    hadBelowTenPct:   hadBelowTenPct,
+    flickPerfect:     runFlickPerfect,
+    holdPerfect:      runHoldPerfect,
+    dtapPerfect:      runDtapPerfect,
+  });
 }
 
 function retryGame() {
   document.getElementById('failed-screen').classList.remove('show');
+  document.getElementById('pause-screen').classList.remove('show');
+  // Resume audio context if suspended (e.g. retrying from pause)
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  _totalPaused = 0;
   startRound();
+}
+
+let _pauseStart = 0;   // performance.now() when paused
+let _totalPaused = 0;  // total ms paused (accumulated)
+
+function pauseGame() {
+  if(!isRunning) return;
+  isRunning = false;
+  _pauseStart = performance.now();
+  if(audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+  document.getElementById('pause-screen').classList.add('show');
+}
+
+function resumeGame() {
+  document.getElementById('pause-screen').classList.remove('show');
+  // Compensate gameStartTime for the time spent paused
+  const pausedMs = performance.now() - _pauseStart;
+  gameStartTime += pausedMs;
+  _totalPaused += pausedMs;
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  isRunning = true;
+  requestAnimationFrame(gameLoop);
 }
 
 function returnToMenu() {
   stopSong();
   isRunning=false;
+  savePartialStats();
   window.location.href='index.php?from=game';
 }
 
@@ -1838,6 +2361,7 @@ async function init() {
     CHART.audio ? loadAudio(CHART.audio) : Promise.resolve(),
     loadHitSounds(),
     loadGameUISounds(),
+    loadAchievementSound(),
   ]);
   setLoad(100);
 
@@ -1856,7 +2380,7 @@ document.addEventListener('keydown', e=>{
   if(e.code==='Space'){e.preventDefault(); handleTap(0);}
   if(e.code==='ArrowLeft') { e.preventDefault(); handleFlick(0,'left'); }
   if(e.code==='ArrowRight'){ e.preventDefault(); handleFlick(0,'right'); }
-  if(e.code==='Escape') returnToMenu();
+  if(e.code==='Escape') { if(document.getElementById('pause-screen').classList.contains('show')) resumeGame(); else pauseGame(); }
 });
 document.addEventListener('keyup', e=>{
   if(e.code==='Space') handleRelease(0);

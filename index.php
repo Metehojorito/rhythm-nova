@@ -321,6 +321,17 @@ footer {
   <header>
     <div class="logo">RHYTHM <span>NOVA</span></div>
     <div class="logo-line"></div>
+    <div style="display:flex;justify-content:center;margin-top:20px;">
+      <a href="achievements.php" style="
+        font-family:'Orbitron',monospace; font-size:9px; letter-spacing:3px;
+        color:rgba(255,255,255,.35); text-decoration:none;
+        border:1px solid rgba(255,255,255,.1); padding:5px 16px; border-radius:3px;
+        transition:all .2s; display:inline-flex; align-items:center; gap:6px;
+      " onmouseover="this.style.color='#fff';this.style.borderColor='rgba(188,19,254,.5)'"
+         onmouseout="this.style.color='rgba(255,255,255,.35)';this.style.borderColor='rgba(255,255,255,.1)'">
+        LOGROS <span id="ach-nav-count" style="color:var(--cyan)"></span>
+      </a>
+    </div>
   </header>
 
   <div id="carousel-wrap">
@@ -781,6 +792,17 @@ if (fromGame) {
 }
 
 loadSongs();
+</script>
+<!-- Achievement count in nav -->
+<script>
+(function(){
+  try {
+    const u = JSON.parse(localStorage.getItem('rn_achievements')||'{}');
+    const n = Object.keys(u).length;
+    const el = document.getElementById('ach-nav-count');
+    if(el && n>0) el.textContent = n+'/36';
+  } catch(e){}
+})();
 </script>
 </body>
 </html>
