@@ -637,7 +637,7 @@ let health = HEALTH_START;
 const lanePressed = [false, false, false];
 
 // Touch tracking per lane for flick detection
-// touchOrigin[lane] = {x, time} at touchstart
+// touchOrigin[lane] = {x, time, id} at touchstart  — id = touch.identifier
 const touchOrigin = [null, null, null];
 const FLICK_THRESHOLD_PX  = 40;   // min horizontal travel
 const FLICK_THRESHOLD_MS  = 300;  // max time to complete swipe
@@ -730,7 +730,8 @@ function buildTapZone() {
     zone.addEventListener('touchstart', e => {
       e.preventDefault();
       const t = e.changedTouches[0];
-      touchOrigin[lane] = { x: t.clientX, time: performance.now() };
+      // Save the touch identifier so touchmove/touchend track the correct finger
+      touchOrigin[lane] = { x: t.clientX, time: performance.now(), id: t.identifier };
       const laneRect = zone.getBoundingClientRect();
       let fingersInLane = 0;
       for(let i = 0; i < e.touches.length; i++) {
@@ -750,7 +751,12 @@ function buildTapZone() {
       e.preventDefault();
       const origin = touchOrigin[lane];
       if(!origin) return;
-      const t = e.changedTouches[0];
+      // Find the specific finger that belongs to this lane
+      let t = null;
+      for(let i = 0; i < e.changedTouches.length; i++) {
+        if(e.changedTouches[i].identifier === origin.id) { t = e.changedTouches[i]; break; }
+      }
+      if(!t) return;
       const dx = t.clientX - origin.x;
       const dt = performance.now() - origin.time;
       if(Math.abs(dx) >= FLICK_THRESHOLD_PX && dt <= FLICK_THRESHOLD_MS) {
@@ -763,11 +769,17 @@ function buildTapZone() {
       e.preventDefault();
       const origin = touchOrigin[lane];
       if(origin) {
-        const t = e.changedTouches[0];
-        const dx = t.clientX - origin.x;
-        const dt = performance.now() - origin.time;
-        if(Math.abs(dx) >= FLICK_THRESHOLD_PX && dt <= FLICK_THRESHOLD_MS)
-          handleFlick(lane, dx > 0 ? 'right' : 'left');
+        // Find the specific finger that belongs to this lane
+        let t = null;
+        for(let i = 0; i < e.changedTouches.length; i++) {
+          if(e.changedTouches[i].identifier === origin.id) { t = e.changedTouches[i]; break; }
+        }
+        if(t) {
+          const dx = t.clientX - origin.x;
+          const dt = performance.now() - origin.time;
+          if(Math.abs(dx) >= FLICK_THRESHOLD_PX && dt <= FLICK_THRESHOLD_MS)
+            handleFlick(lane, dx > 0 ? 'right' : 'left');
+        }
       }
       handleRelease(lane);
     }, { passive: false });
