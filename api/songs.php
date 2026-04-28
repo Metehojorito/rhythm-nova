@@ -73,6 +73,7 @@ function buildSong(string $folderName): ?array {
             'label'     => $chart['label']  ?? strtoupper($diff),
             'level'     => $chart['level']  ?? 1,
             'noteCount' => count($chart['notes'] ?? []),
+            'lanes'     => (int)($chart['lanes'] ?? 1),
             'bestScore' => $best['score'] ?? null,
             'bestCombo' => $best['combo'] ?? null,
             'bestRank'  => $best['rank']  ?? null,

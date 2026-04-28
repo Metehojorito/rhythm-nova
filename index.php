@@ -98,18 +98,33 @@ header { text-align:center; }
 .card-cover-placeholder {
   width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:44px;
 }
-.card-body { padding:12px 14px; flex:1; display:flex; flex-direction:column; }
+.card-body { padding:10px 14px; flex:1; display:flex; flex-direction:column; overflow:hidden; }
 .card-title {
   font-family:'Orbitron',monospace; font-size:13px; font-weight:700; letter-spacing:1px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px;
 }
-.card-artist { font-size:12px; color:rgba(255,255,255,.4); font-style:italic; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.card-bpm { font-size:10px; color:var(--cyan); letter-spacing:2px; margin-bottom:8px; }
-.card-diffs { display:flex; gap:4px; flex-wrap:wrap; }
+.card-artist { font-size:12px; color:rgba(255,255,255,.4); font-style:italic; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card-bpm { font-size:10px; color:var(--cyan); letter-spacing:2px; margin-bottom:6px; }
+.card-diffs { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:0; }
 .diff-pill {
   font-size:9px; font-weight:700; letter-spacing:1px; padding:2px 8px;
   border-radius:20px; border:1px solid; color:inherit;
 }
+
+/* ── Diff info block (shown below pills when this diff is selected) ── */
+.card-diff-info {
+  margin-top:8px; padding:7px 9px; border-radius:8px;
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+  display:flex; gap:12px; align-items:center;
+  transition: border-color .25s, background .25s;
+}
+.card-diff-info.easy   { border-color:rgba(0,255,136,.22);  background:rgba(0,255,136,.05); }
+.card-diff-info.normal { border-color:rgba(0,242,255,.22);  background:rgba(0,242,255,.05); }
+.card-diff-info.hard   { border-color:rgba(255,49,49,.22);  background:rgba(255,49,49,.05); }
+.cdi-item { display:flex; flex-direction:column; align-items:center; flex:1; }
+.cdi-val  { font-family:'Orbitron',monospace; font-size:13px; font-weight:700; line-height:1; }
+.cdi-lbl  { font-size:8px; letter-spacing:1.5px; color:rgba(255,255,255,.35); margin-top:3px; text-transform:uppercase; }
+.cdi-sep  { width:1px; height:28px; background:rgba(255,255,255,.08); flex-shrink:0; }
 .card-footer {
   padding:8px 14px; border-top:1px solid rgba(255,255,255,.06);
   display:flex; justify-content:space-between; align-items:center;
@@ -447,33 +462,84 @@ function makeCard(song, idx) {
   const overlay = document.createElement('div'); overlay.className='card-cover-overlay';
   cover.appendChild(overlay);
 
-  // Diff pills
+  // Diff pills + info block
   const diffs = Object.entries(song.difficulties || {});
   const sorted = diffs.sort((a,b) => DIFF_ORDER.indexOf(a[0]) - DIFF_ORDER.indexOf(b[0]));
-  const pillsHtml = sorted.map(([key,d]) =>
-    `<span class="diff-pill" style="border-color:${DIFF_COLORS[key]||'#bc13fe'};color:${DIFF_COLORS[key]||'#bc13fe'}">${d.label} ${d.level}</span>`
-  ).join('');
-
-  // Best score overall
-  let bestScore=null, bestRank=null;
-  diffs.forEach(([,d]) => { if(d.bestScore!==null&&(bestScore===null||d.bestScore>bestScore)){ bestScore=d.bestScore; bestRank=d.bestRank; }});
 
   const body = document.createElement('div'); body.className='card-body';
   body.innerHTML = `
     <div class="card-title">${esc(song.title)}</div>
     <div class="card-artist">${esc(song.artist)}</div>
     <div class="card-bpm">${song.bpm} BPM · ${fmtDur(song.duration)}</div>
-    <div class="card-diffs">${pillsHtml}</div>`;
+    <div class="card-diffs" id="card-pills-${idx}"></div>
+    <div class="card-diff-info" id="card-diffinfo-${idx}"></div>`;
 
   const footer = document.createElement('div'); footer.className='card-footer';
   footer.innerHTML = `
     <div>
       <div class="card-score-label">Mejor puntuación</div>
-      <div class="card-score">${bestScore!==null ? bestScore.toString().padStart(6,'0') : '------'}</div>
+      <div class="card-score" id="card-score-${idx}">------</div>
     </div>
-    <div class="card-rank" style="color:${RANK_COLORS[bestRank]||'rgba(255,255,255,.2)'}">${bestRank||'—'}</div>`;
+    <div class="card-rank" id="card-rank-${idx}" style="color:rgba(255,255,255,.2)">—</div>`;
 
   card.appendChild(cover); card.appendChild(body); card.appendChild(footer);
+
+  // Render pills and diff-info (called also on diff change)
+  function refreshCardDiff(activeDiff) {
+    // Pills
+    const pillsWrap = body.querySelector(`#card-pills-${idx}`);
+    pillsWrap.innerHTML = '';
+    sorted.forEach(([key, d]) => {
+      const pill = document.createElement('span');
+      pill.className = 'diff-pill';
+      const col = DIFF_COLORS[key] || '#bc13fe';
+      const isActive = key === activeDiff;
+      pill.style.borderColor = col;
+      pill.style.color = col;
+      pill.style.background = isActive ? col + '22' : 'transparent';
+      pill.style.fontWeight = isActive ? '900' : '700';
+      pill.textContent = `${d.label} ${d.level}`;
+      pillsWrap.appendChild(pill);
+    });
+
+    // Diff info block
+    const infoWrap = body.querySelector(`#card-diffinfo-${idx}`);
+    const d = song.difficulties[activeDiff];
+    if (d) {
+      const lanes  = d.lanes     ?? 1;
+      const notes  = d.noteCount ?? '?';
+      infoWrap.className = `card-diff-info ${activeDiff}`;
+      const laneIcons = ['●', '●●', '●●●'];
+      infoWrap.innerHTML = `
+        <div class="cdi-item">
+          <div class="cdi-val" style="color:${DIFF_COLORS[activeDiff]||'#bc13fe'};letter-spacing:2px">${laneIcons[lanes-1]||'●'}</div>
+          <div class="cdi-lbl">${lanes === 1 ? '1 carril' : lanes + ' carriles'}</div>
+        </div>
+        <div class="cdi-sep"></div>
+        <div class="cdi-item">
+          <div class="cdi-val">${notes}</div>
+          <div class="cdi-lbl">notas</div>
+        </div>`;
+    } else {
+      infoWrap.innerHTML = '';
+    }
+
+    // Footer score/rank for this diff
+    const sc = d ? d.bestScore : null;
+    const rk = d ? d.bestRank  : null;
+    footer.querySelector(`#card-score-${idx}`).textContent = sc !== null ? sc.toString().padStart(6,'0') : '------';
+    const rankEl = footer.querySelector(`#card-rank-${idx}`);
+    rankEl.textContent = rk || '—';
+    rankEl.style.color = RANK_COLORS[rk] || 'rgba(255,255,255,.2)';
+  }
+
+  // Initial render
+  const initDiff = sorted.find(([k])=>k===selectedDiff)?.[0] || sorted[0]?.[0] || 'normal';
+  refreshCardDiff(initDiff);
+
+  // Store refresh fn so buildDiffSelector can call it
+  card._refreshDiff = refreshCardDiff;
+
   card.addEventListener('click', () => { if(idx!==currentIdx){ currentIdx=idx; updatePositions(); buildDiffSelector(); }});
   return card;
 }
@@ -515,9 +581,16 @@ function buildDiffSelector() {
       sfxDiffsel();
       selectedDiff = key;
       wrap.querySelectorAll('.diff-btn').forEach(b=>b.classList.toggle('active',b.dataset.diff===key));
+      // Refresh active card's diff info
+      const activeCard = document.querySelector('.song-card[data-pos="0"]');
+      if (activeCard && activeCard._refreshDiff) activeCard._refreshDiff(selectedDiff);
     });
     wrap.appendChild(btn);
   });
+
+  // Refresh the active card on initial build (e.g. after song change)
+  const activeCard = document.querySelector('.song-card[data-pos="0"]');
+  if (activeCard && activeCard._refreshDiff) activeCard._refreshDiff(selectedDiff);
 }
 
 // ══════════════════════════════════════════════════════════════════
